@@ -117,17 +117,17 @@ const Community = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-hero relative overflow-hidden">
-          <div className="container mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
+        <section className="py-20 bg-gradient-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-secondary/10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
               Grantly Scholar Community
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-slide-up">
-              Connect with successful scholars, find mentors, and join a global network 
-              of students achieving their educational dreams together.
+            <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
+              Join a global network of successful scholars, experienced mentors, and inspiring alumni who support each other's journey to success.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button size="lg" className="bg-white/20 border-white/20 text-primary-foreground hover:bg-white/30">
                 Join Community
               </Button>
               <Button size="lg" variant="secondary">

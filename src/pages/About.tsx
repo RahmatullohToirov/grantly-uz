@@ -40,12 +40,13 @@ const About = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-hero relative overflow-hidden">
-          <div className="container mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
+        <section className="py-20 bg-gradient-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-secondary/10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
               About Grantly
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-slide-up">
+            <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
               We believe every student deserves access to educational opportunities. 
               Grantly makes scholarship discovery and application tracking simple, organized, and successful.
             </p>

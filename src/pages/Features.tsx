@@ -97,18 +97,15 @@ const Features = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-hero relative overflow-hidden">
-          <div className="container mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-              Powerful Features for Your Success
+        <section className="py-20 bg-gradient-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-secondary/10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
+              Powerful Features
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-slide-up">
-              Everything you need to discover, track, and secure educational opportunities 
-              in one comprehensive platform.
+            <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
+              Discover the tools that make Grantly the ultimate platform for managing your scholarship journey and achieving your dreams.
             </p>
-            <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-              Start Free Trial
-            </Button>
           </div>
         </section>
 

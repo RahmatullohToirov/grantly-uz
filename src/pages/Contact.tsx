@@ -86,14 +86,14 @@ const Contact = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-hero relative overflow-hidden">
-          <div className="container mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-              Get in Touch
+        <section className="py-20 bg-gradient-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-secondary/10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
+              Get In Touch
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-slide-up">
-              Have questions about Grantly? Need help with your scholarship journey? 
-              We're here to support you every step of the way.
+            <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
+              Ready to start your scholarship journey? Have questions about our platform? We're here to help you succeed.
             </p>
           </div>
         </section>

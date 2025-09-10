@@ -108,22 +108,22 @@ const Resources = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-hero relative overflow-hidden">
-          <div className="container mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-              Resources & Guides
+        <section className="py-20 bg-gradient-primary relative overflow-hidden">
+          <div className="absolute inset-0 bg-secondary/10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
+              Learning Resources
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-slide-up">
-              Expert insights, practical guides, and proven strategies to help you succeed 
-              in your scholarship journey and personal growth.
+            <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
+              Access expert guides, video tutorials, and scholarship strategies to maximize your success and achieve your educational goals.
             </p>
             
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-primary-foreground/70 h-5 w-5" />
               <Input 
                 placeholder="Search articles, guides, and resources..."
-                className="pl-12 py-6 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/70"
+                className="pl-12 py-6 text-lg bg-white/10 border-white/20 text-primary-foreground placeholder:text-primary-foreground/70"
               />
             </div>
           </div>

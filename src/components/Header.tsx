@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import grantlyLogo from "@/assets/grantly-logo.png";
+import SignInModal from "@/components/auth/SignInModal";
+import SignUpModal from "@/components/auth/SignUpModal";
 
 const Header = () => {
   return (
@@ -9,9 +10,9 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             <a href="/" className="flex items-center space-x-2">
               <img 
-                src="/lovable-uploads/5fe2fbcf-488e-4b74-85a8-76d8b3071f79.png" 
-                alt="Grantly Logo" 
-                className="h-12 w-auto hover:scale-105 transition-transform"
+                src="/lovable-uploads/d5d5abbb-a27e-4b06-8508-d663f6314de3.png" 
+                alt="Grantly - Find. Apply. Achieve." 
+                className="h-16 w-auto hover:scale-105 transition-transform"
               />
             </a>
           </div>
@@ -35,20 +36,23 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="hidden md:inline-flex"
-              onClick={() => window.location.href = '/signin'}
-            >
-              Sign In
-            </Button>
-            <Button 
-              variant="hero" 
-              size="lg"
-              onClick={() => window.location.href = '/signup'}
-            >
-              Get Started Free
-            </Button>
+            <SignInModal>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex"
+              >
+                Sign In
+              </Button>
+            </SignInModal>
+            <SignUpModal>
+              <Button 
+                variant="default" 
+                size="lg"
+                className="bg-gradient-primary text-primary-foreground hover:shadow-button transition-all"
+              >
+                Get Started Free
+              </Button>
+            </SignUpModal>
           </div>
         </div>
       </div>
