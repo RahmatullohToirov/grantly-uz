@@ -5,7 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SignUpModalProps {
   children: React.ReactNode;
@@ -17,59 +19,138 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
     firstName: "",
     lastName: "",
     email: "",
-    password: "",
-    agreeToTerms: false
+    password: ""
   });
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Sign up:", formData);
+    if (!agreeToTerms) {
+      toast({
+        title: "Terms required",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Error creating account",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Account created!",
+          description: "Check your email to confirm your account.",
+        });
+        setOpen(false);
+        setFormData({ firstName: "", lastName: "", email: "", password: "" });
+        setAgreeToTerms(false);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Join Grantly
+            Create Your Account
           </DialogTitle>
-          <p className="text-muted-foreground">Start your scholarship journey today</p>
+          <p className="text-muted-foreground">Join thousands of students finding scholarships</p>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="firstName"
+                  name="firstName"
+                  type="text"
                   placeholder="John"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  onChange={handleInputChange}
                   className="pl-10"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                placeholder="Doe"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                required
-              />
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="pl-10"
+                  required
+                  disabled={loading}
+                />
+              </div>
             </div>
           </div>
           
@@ -79,12 +160,14 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={handleInputChange}
                 className="pl-10"
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -95,17 +178,20 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a secure password"
+                placeholder="Create a strong password"
                 value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
+                onChange={handleInputChange}
                 className="pl-10 pr-10"
                 required
+                disabled={loading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                disabled={loading}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -115,24 +201,29 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="terms"
-              checked={formData.agreeToTerms}
-              onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked as boolean)}
+              checked={agreeToTerms}
+              onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
+              disabled={loading}
             />
             <Label htmlFor="terms" className="text-sm">
               I agree to the{" "}
-              <a href="#" className="text-primary hover:underline">Terms of Service</a>
-              {" "}and{" "}
-              <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+              <a href="#" className="text-primary hover:underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-primary hover:underline">
+                Privacy Policy
+              </a>
             </Label>
           </div>
           
           <Button 
             type="submit" 
             className="w-full" 
-            size="lg"
-            disabled={!formData.agreeToTerms}
+            size="lg" 
+            disabled={!agreeToTerms || loading}
           >
-            Create Account
+            {loading ? "Creating account..." : "Create Account"}
           </Button>
         </form>
         
@@ -144,18 +235,15 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
         </div>
         
         <div className="space-y-2">
-          <Button variant="outline" className="w-full" size="lg">
+          <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignUp}>
             Continue with Google
-          </Button>
-          <Button variant="outline" className="w-full" size="lg">
-            Continue with LinkedIn
           </Button>
         </div>
         
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <a href="#" className="text-primary hover:underline font-medium">
-            Sign in
+            Sign in here
           </a>
         </p>
       </DialogContent>
