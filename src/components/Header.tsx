@@ -12,7 +12,7 @@ const Header = () => {
               <img 
                 src="/lovable-uploads/d5d5abbb-a27e-4b06-8508-d663f6314de3.png" 
                 alt="Grantly - Find. Apply. Achieve." 
-                className="h-16 w-auto hover:scale-105 transition-transform"
+                className="h-20 w-auto hover:scale-105 transition-transform"
               />
             </a>
           </div>
@@ -23,6 +23,9 @@ const Header = () => {
             </a>
             <a href="/features" className="text-muted-foreground hover:text-primary transition-colors">
               Features
+            </a>
+            <a href="/pricing" className="text-muted-foreground hover:text-primary transition-colors">
+              Pricing
             </a>
             <a href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
               Resources
@@ -40,6 +43,7 @@ const Header = () => {
               <Button 
                 variant="ghost" 
                 className="hidden md:inline-flex"
+                data-signin-trigger
               >
                 Sign In
               </Button>
@@ -49,6 +53,7 @@ const Header = () => {
                 variant="default" 
                 size="lg"
                 className="bg-gradient-primary text-primary-foreground hover:shadow-button transition-all"
+                data-signup-trigger
               >
                 Get Started Free
               </Button>

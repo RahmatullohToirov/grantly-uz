@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import studentsSuccess from "@/assets/students-success.jpg";
+import SignUpModal from "@/components/auth/SignUpModal";
 
 const MissionSection = () => {
   return (
@@ -69,10 +70,12 @@ const MissionSection = () => {
                 </div>
               </div>
               
-              <Button variant="hero" size="xl" className="group">
-                Join Our Mission
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <SignUpModal>
+                <Button variant="hero" size="xl" className="group">
+                  Join Our Mission
+                  <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </SignUpModal>
             </div>
           </div>
         </div>

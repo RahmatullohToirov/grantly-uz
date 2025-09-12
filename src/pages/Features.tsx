@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import SignUpModal from "@/components/auth/SignUpModal";
 import { 
   Search, 
   Target, 
@@ -223,10 +224,12 @@ const Features = () => {
               Start your free trial today and see how Grantly can transform your scholarship journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                Start Free Trial
-              </Button>
-              <Button size="lg" variant="secondary">
+              <SignUpModal>
+                <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                  Start Free Trial
+                </Button>
+              </SignUpModal>
+              <Button size="lg" variant="secondary" onClick={() => window.location.href = '/pricing'}>
                 View Pricing
               </Button>
             </div>

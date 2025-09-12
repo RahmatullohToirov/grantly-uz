@@ -242,9 +242,12 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
         
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <a href="#" className="text-primary hover:underline font-medium">
+          <button 
+            onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signin-trigger]') as HTMLElement)?.click(), 100);}}
+            className="text-primary hover:underline font-medium"
+          >
             Sign in here
-          </a>
+          </button>
         </p>
       </DialogContent>
     </Dialog>

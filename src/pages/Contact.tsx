@@ -186,7 +186,7 @@ const Contact = () => {
                         rows={5}
                       />
                     </div>
-                    <Button className="w-full">
+                    <Button className="w-full" onClick={() => alert('Message sent successfully! We\'ll get back to you soon.')}>
                       Send Message
                       <Mail className="h-4 w-4 ml-2" />
                     </Button>

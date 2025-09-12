@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, Heart } from "lucide-react";
+import SignUpModal from "@/components/auth/SignUpModal";
 
 const About = () => {
   const values = [
@@ -158,9 +159,11 @@ const About = () => {
               Join thousands of students who are already tracking their opportunities and achieving their dreams.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => window.location.href = '/signup'}>
-                Get Started Free
-              </Button>
+              <SignUpModal>
+                <Button size="lg">
+                  Get Started Free
+                </Button>
+              </SignUpModal>
               <Button variant="outline" size="lg" onClick={() => window.location.href = '/features'}>
                 Explore Features
               </Button>

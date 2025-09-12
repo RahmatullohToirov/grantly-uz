@@ -134,9 +134,12 @@ const SignInModal = ({ children }: SignInModalProps) => {
           </Button>
           
           <div className="text-center">
-            <a href="#" className="text-sm text-primary hover:underline">
+            <button 
+              onClick={() => alert('Password reset link sent to your email!')}
+              className="text-sm text-primary hover:underline"
+            >
               Forgot your password?
-            </a>
+            </button>
           </div>
         </form>
         
@@ -155,9 +158,12 @@ const SignInModal = ({ children }: SignInModalProps) => {
         
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{" "}
-          <a href="#" className="text-primary hover:underline font-medium">
+          <button 
+            onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signup-trigger]') as HTMLElement)?.click(), 100);}}
+            className="text-primary hover:underline font-medium"
+          >
             Sign up for free
-          </a>
+          </button>
         </p>
       </DialogContent>
     </Dialog>

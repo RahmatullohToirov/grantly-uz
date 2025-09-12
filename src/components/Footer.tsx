@@ -11,7 +11,7 @@ const Footer = () => {
               <img 
                 src="/lovable-uploads/5fe2fbcf-488e-4b74-85a8-76d8b3071f79.png" 
                 alt="Grantly Logo" 
-                className="h-8 w-auto brightness-0 invert"
+                className="h-12 w-auto brightness-0 invert"
               />
             </div>
             <p className="text-background/80 leading-relaxed">
@@ -117,7 +117,7 @@ const Footer = () => {
           {/* Copyright */}
           <div className="text-center mt-8 pt-8 border-t border-background/20">
             <p className="text-background/60 text-sm">
-              © 2024 Grantly. All rights reserved. Made with ❤️ for students worldwide.
+              © 2025 Grantly. All rights reserved. Made with ❤️ for students worldwide.
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
 import heroIllustration from "@/assets/hero-illustration.jpg";
+import SignUpModal from "@/components/auth/SignUpModal";
 
 const HeroSection = () => {
   return (
@@ -30,10 +31,12 @@ const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" size="xl" className="group">
-                Get Started Free
-                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <SignUpModal>
+                <Button variant="hero" size="xl" className="group">
+                  Get Started Free
+                  <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </SignUpModal>
               
               <Button variant="hero-outline" size="xl" className="group">
                 <Play className="group-hover:scale-110 transition-transform" />

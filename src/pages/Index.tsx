@@ -6,6 +6,7 @@ import MissionSection from "@/components/MissionSection";
 import PricingSection from "@/components/PricingSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import Footer from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
         <TestimonialsSection />
       </main>
       <Footer />
+      <ChatBot />
     </div>
   );
 };

@@ -13,6 +13,9 @@ import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import Scholarships from "./pages/Scholarships";
 import Profile from "./pages/Profile";
+import Pricing from "./pages/Pricing";
+import VideoLearning from "./pages/VideoLearning";
+import MentorMatching from "./pages/MentorMatching";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +62,7 @@ const App = () => (
             <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
             <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
             <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
+            <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
             <Route path="/resources" element={<PublicRoute><Resources /></PublicRoute>} />
             <Route path="/community" element={<PublicRoute><Community /></PublicRoute>} />
             <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
@@ -66,6 +70,8 @@ const App = () => (
             {/* Protected routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/scholarships" element={<ProtectedRoute><Scholarships /></ProtectedRoute>} />
+            <Route path="/video-learning" element={<ProtectedRoute><VideoLearning /></ProtectedRoute>} />
+            <Route path="/mentor-matching" element={<ProtectedRoute><MentorMatching /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             
             {/* Catch-all route */}
