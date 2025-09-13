@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -244,7 +245,7 @@ const Contact = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 bg-background">
+        <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -255,14 +256,17 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-6">
               {faqs.map((faq, index) => (
-                <Card key={index} className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-card-foreground mb-3">
+                <Card key={index} className="bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant transition-all duration-300 hover:scale-[1.01]">
+                  <CardContent className="p-8">
+                    <h3 className="text-xl font-bold text-card-foreground mb-4 flex items-center">
+                      <span className="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4">
+                        {index + 1}
+                      </span>
                       {faq.question}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed text-lg ml-12">
                       {faq.answer}
                     </p>
                   </CardContent>
@@ -297,6 +301,7 @@ const Contact = () => {
         </section>
       </main>
       <Footer />
+      <ChatBot />
     </div>
   );
 };

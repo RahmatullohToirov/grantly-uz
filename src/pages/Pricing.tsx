@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Check, Star } from "lucide-react";
 import SignUpModal from "@/components/auth/SignUpModal";
@@ -165,7 +166,7 @@ const Pricing = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-20 bg-muted/30">
+        <section className="py-20 bg-gradient-to-br from-primary/5 to-secondary/5">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -176,7 +177,7 @@ const Pricing = () => {
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-4xl mx-auto space-y-8">
               {[
                 {
                   question: "Can I change plans anytime?",
@@ -195,11 +196,14 @@ const Pricing = () => {
                   answer: "Yes! All paid plans come with a 14-day free trial. No credit card required to start your trial."
                 }
               ].map((faq, index) => (
-                <div key={index} className="bg-card rounded-xl p-6 border border-border shadow-soft">
-                  <h3 className="text-lg font-semibold text-card-foreground mb-3">
+                <div key={index} className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border border-border shadow-elegant hover:shadow-soft transition-all duration-300 hover:scale-[1.02]">
+                  <h3 className="text-xl font-bold text-card-foreground mb-4 flex items-center">
+                    <span className="bg-primary/10 text-primary rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold mr-4">
+                      {index + 1}
+                    </span>
                     {faq.question}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed text-lg ml-14">
                     {faq.answer}
                   </p>
                 </div>
@@ -226,6 +230,7 @@ const Pricing = () => {
         </section>
       </main>
       <Footer />
+      <ChatBot />
     </div>
   );
 };
