@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Home, Search, BarChart3, Users, BookOpen, User, LogOut } from "lucide-react";
+import { Bell, Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -44,8 +44,16 @@ const DashboardHeader = () => {
               <Search className="h-4 w-4" />
               <span>Scholarships</span>
             </a>
-            <a href="/community" className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors">
+            <a href="/video-learning" className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors">
+              <PlayCircle className="h-4 w-4" />
+              <span>Learning Hub</span>
+            </a>
+            <a href="/mentor-matching" className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors">
               <Users className="h-4 w-4" />
+              <span>Expert Connect</span>
+            </a>
+            <a href="/community" className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors">
+              <MessageCircle className="h-4 w-4" />
               <span>Community</span>
             </a>
             <a href="/resources" className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors">
