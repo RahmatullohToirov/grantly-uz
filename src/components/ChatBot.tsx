@@ -31,19 +31,31 @@ const ChatBot = () => {
     "help": "I can assist with: Finding scholarships, Application tips, Platform features, Pricing information, Success strategies. Just ask me anything!",
     "deadlines": "Managing deadlines is crucial! I recommend setting up reminders 2 weeks before each deadline, creating a calendar of all applications, and prioritizing by deadline date and scholarship value.",
     "essays": "For great scholarship essays: 1) Tell your unique story 2) Answer the prompt directly 3) Show, don't tell 4) Be authentic 5) Proofread carefully. Want tips for specific essay types?",
+    "merit": "Merit-based scholarships reward academic excellence, leadership, or special talents. Tips: Maintain high GPA, participate in extracurriculars, showcase unique skills, and highlight achievements in your applications.",
+    "need": "Need-based scholarships consider your financial situation. Make sure to complete FAFSA, gather financial documents, and write compelling essays about your circumstances and goals.",
+    "tips": "Top scholarship tips: 1) Apply early and often 2) Read requirements carefully 3) Customize each application 4) Follow up appropriately 5) Stay organized with deadlines 6) Ask for help when needed.",
+    "international": "For international students: Look for diversity scholarships, check with your home country's education ministry, consider study abroad programs, and research university-specific international student funding.",
+    "community": "Join our community for peer support, mentor connections, success story sharing, and real-time scholarship alerts. Connect with students who share similar goals and backgrounds!",
+    "resources": "Our resources include scholarship databases, application templates, essay guides, deadline calendars, financial aid calculators, and expert webinars. What specific resource would help you most?",
     "default": "That's a great question! For detailed guidance on scholarship strategies, I'd recommend checking our Resources section or connecting with our community mentors. Is there something specific about scholarships or applications I can help with?"
   };
 
   const getBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
     
-    if (message.includes("hello") || message.includes("hi")) return predefinedResponses.hello;
-    if (message.includes("scholarship") || message.includes("funding")) return predefinedResponses.scholarships;
+    if (message.includes("hello") || message.includes("hi") || message.includes("hey")) return predefinedResponses.hello;
+    if (message.includes("scholarship") || message.includes("funding") || message.includes("grant")) return predefinedResponses.scholarships;
     if (message.includes("application") || message.includes("apply")) return predefinedResponses.application;
-    if (message.includes("price") || message.includes("cost") || message.includes("plan")) return predefinedResponses.pricing;
-    if (message.includes("help") || message.includes("support")) return predefinedResponses.help;
-    if (message.includes("deadline") || message.includes("due date")) return predefinedResponses.deadlines;
-    if (message.includes("essay") || message.includes("writing")) return predefinedResponses.essays;
+    if (message.includes("price") || message.includes("cost") || message.includes("plan") || message.includes("pricing")) return predefinedResponses.pricing;
+    if (message.includes("help") || message.includes("support") || message.includes("assist")) return predefinedResponses.help;
+    if (message.includes("deadline") || message.includes("due date") || message.includes("timeline")) return predefinedResponses.deadlines;
+    if (message.includes("essay") || message.includes("writing") || message.includes("personal statement")) return predefinedResponses.essays;
+    if (message.includes("merit") || message.includes("academic") || message.includes("gpa")) return predefinedResponses.merit;
+    if (message.includes("need") || message.includes("financial") || message.includes("income")) return predefinedResponses.need;
+    if (message.includes("tip") || message.includes("advice") || message.includes("strategy")) return predefinedResponses.tips;
+    if (message.includes("international") || message.includes("foreign") || message.includes("study abroad")) return predefinedResponses.international;
+    if (message.includes("community") || message.includes("mentor") || message.includes("peer")) return predefinedResponses.community;
+    if (message.includes("resource") || message.includes("guide") || message.includes("template")) return predefinedResponses.resources;
     
     return predefinedResponses.default;
   };

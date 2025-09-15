@@ -57,19 +57,34 @@ const SignInModal = ({ children }: SignInModalProps) => {
   };
 
   const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
       }
-    });
-    
-    if (error) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to sign in with Google",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 

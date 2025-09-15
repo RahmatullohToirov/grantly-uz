@@ -1,9 +1,19 @@
 import { Button } from "@/components/ui/button";
 import SignInModal from "@/components/auth/SignInModal";
 import SignUpModal from "@/components/auth/SignUpModal";
+import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 
 const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
+
   return (
+    <>
+      {/* Main Header */}
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
@@ -38,14 +48,16 @@ const Header = () => {
             </a>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <LanguageSwitcher />
             <SignInModal>
               <Button 
                 variant="ghost" 
                 className="hidden md:inline-flex"
                 data-signin-trigger
               >
-                Sign In
+                {t('signIn')}
               </Button>
             </SignInModal>
             <SignUpModal>
@@ -55,13 +67,93 @@ const Header = () => {
                 className="bg-gradient-primary text-primary-foreground hover:shadow-button transition-all"
                 data-signup-trigger
               >
-                Get Started Free
+                {t('getStartedFree')}
               </Button>
             </SignUpModal>
+            
+            {/* Mobile menu button */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
       </div>
+      
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
+          <nav className="container mx-auto px-6 py-4 space-y-2">
+            <a 
+              href="/about" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
+            </a>
+            <a 
+              href="/features" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a 
+              href="/pricing" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Pricing
+            </a>
+            <a 
+              href="/resources" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Resources
+            </a>
+            <a 
+              href="/community" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Community
+            </a>
+            <a 
+              href="/contact" 
+              className="block py-2 text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact
+            </a>
+            <div className="pt-4 flex flex-col space-y-2">
+              <SignInModal>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {t('signIn')}
+                </Button>
+              </SignInModal>
+              <SignUpModal>
+                <Button 
+                  className="w-full bg-gradient-primary text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {t('getStartedFree')}
+                </Button>
+              </SignUpModal>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
+    </>
   );
 };
 
