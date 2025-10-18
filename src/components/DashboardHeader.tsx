@@ -40,12 +40,13 @@ const DashboardHeader = () => {
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
+          {/* Logo - responsive sizing */}
           <div className="flex items-center space-x-2">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <img 
                 src="/lovable-uploads/d5d5abbb-a27e-4b06-8508-d663f6314de3.png" 
                 alt="Grantly - Find. Apply. Achieve." 
-                className="h-12 w-auto hover:scale-105 transition-transform"
+                className="h-10 sm:h-12 md:h-14 w-auto hover:scale-105 transition-transform"
               />
             </Link>
           </div>
@@ -64,27 +65,33 @@ const DashboardHeader = () => {
             ))}
           </nav>
 
+          {/* Right side controls */}
           <div className="flex items-center space-x-2">
-            <ThemeToggle />
-            <LanguageSwitcher />
+            {/* Theme and Language - Hidden on smallest screens, shown in mobile menu */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <ThemeToggle />
+              <LanguageSwitcher />
+            </div>
             
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
               <Bell className="h-5 w-5" />
             </Button>
             
-            {/* Mobile menu button */}
+            {/* Mobile menu button - Always visible on mobile */}
             <Button 
               variant="ghost" 
               size="icon"
               className="lg:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
             
+            {/* User Avatar - Hidden on smallest screens */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hidden sm:inline-flex">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
                     <AvatarFallback>
@@ -127,18 +134,72 @@ const DashboardHeader = () => {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-sm">
-          <nav className="container mx-auto px-4 py-4 space-y-2">
+          <nav className="container mx-auto px-4 py-4 space-y-3">
+            {/* Settings Section for Mobile - Only on smallest screens */}
+            <div className="flex items-center justify-between pb-3 border-b border-border sm:hidden">
+              <span className="text-sm font-medium text-muted-foreground">Settings</span>
+              <div className="flex items-center space-x-2">
+                <ThemeToggle />
+                <LanguageSwitcher />
+              </div>
+            </div>
+
+            {/* User Info on Mobile - Only on smallest screens */}
+            <div className="flex items-center space-x-3 pb-3 border-b border-border sm:hidden">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
+                <AvatarFallback>
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className="flex items-center space-x-3 py-2 text-muted-foreground hover:text-primary transition-colors"
+                className="flex items-center space-x-3 py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg hover:bg-muted/50 px-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}
+
+            {/* Profile Actions - Only on smallest screens */}
+            <div className="pt-3 border-t border-border space-y-2 sm:hidden">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  navigate("/profile");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <User className="mr-2 h-5 w-5" />
+                <span>{t('profile')}</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  handleSignOut();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                <span>{t('logout')}</span>
+              </Button>
+            </div>
           </nav>
         </div>
       )}
