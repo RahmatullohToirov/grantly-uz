@@ -67,8 +67,6 @@ export default () => (
                 <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
                 <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
                 <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
-                <Route path="/resources" element={<PublicRoute><Resources /></PublicRoute>} />
-                <Route path="/community" element={<PublicRoute><Community /></PublicRoute>} />
                 <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
                 
                 {/* Protected routes */}

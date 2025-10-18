@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import DashboardHeader from "@/components/DashboardHeader";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
@@ -247,7 +247,7 @@ const Resources = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <DashboardHeader />
       <main>
         {/* Hero Section */}
         <section className="py-20 bg-gradient-primary relative overflow-hidden">
