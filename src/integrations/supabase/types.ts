@@ -279,10 +279,14 @@ export type Database = {
           deadline: string | null
           description: string | null
           id: string
+          last_updated: string | null
           link: string | null
           location: string | null
           requirements: string | null
+          source_name: string | null
+          source_url: string | null
           title: string
+          unique_hash: string | null
         }
         Insert: {
           amount?: number | null
@@ -291,10 +295,14 @@ export type Database = {
           deadline?: string | null
           description?: string | null
           id?: string
+          last_updated?: string | null
           link?: string | null
           location?: string | null
           requirements?: string | null
+          source_name?: string | null
+          source_url?: string | null
           title: string
+          unique_hash?: string | null
         }
         Update: {
           amount?: number | null
@@ -303,10 +311,14 @@ export type Database = {
           deadline?: string | null
           description?: string | null
           id?: string
+          last_updated?: string | null
           link?: string | null
           location?: string | null
           requirements?: string | null
+          source_name?: string | null
+          source_url?: string | null
           title?: string
+          unique_hash?: string | null
         }
         Relationships: []
       }
@@ -467,7 +479,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_scholarship_hash: {
+        Args: { link: string; title: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
