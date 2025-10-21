@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import ChatBot from "@/components/ChatBot";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Star, 
   MessageCircle, 
@@ -17,92 +23,107 @@ import {
   Users,
   CheckCircle,
   Heart,
-  MapPin
+  MapPin,
+  Send
 } from "lucide-react";
 
-const MentorMatching = () => {
-  const mentorCategories = [
-    { name: "All Mentors", count: 156, active: true },
-    { name: "STEM", count: 45 },
-    { name: "Arts & Humanities", count: 38 },
-    { name: "Business", count: 32 },
-    { name: "Medicine", count: 28 },
-    { name: "Law", count: 13 }
-  ];
+interface Mentor {
+  id: string;
+  name: string;
+  title: string | null;
+  expertise: string[] | null;
+  bio: string | null;
+  avatar_url: string | null;
+  contact_info: string | null;
+  available: boolean;
+}
 
-  const featuredMentors = [
-    {
-      id: 1,
-      name: "Dr. Sarah Kim",
-      title: "Rhodes Scholar, Harvard PhD",
-      expertise: ["STEM Scholarships", "Research Applications", "Graduate School"],
-      university: "Harvard University",
-      country: "United States",
-      rating: 4.9,
-      reviews: 127,
-      sessions: 450,
-      responseTime: "< 2 hours",
-      languages: ["English", "Korean"],
-      price: 75,
-      about: "Former Rhodes Scholar with 8+ years helping students secure STEM scholarships. Specializing in research-based applications and graduate school prep.",
-      availability: "Available this week",
-      verified: true,
-      topMentor: true
-    },
-    {
-      id: 2,
-      name: "Prof. Michael Chen",
-      title: "Fulbright Scholar, MIT Professor",
-      expertise: ["Engineering", "International Students", "PhD Applications"],
-      university: "MIT",
-      country: "United States",
-      rating: 4.8,
-      reviews: 203,
-      sessions: 672,
-      responseTime: "< 4 hours",
-      languages: ["English", "Mandarin"],
-      price: 90,
-      about: "MIT professor and former Fulbright Scholar. Expert in helping international students navigate US scholarship applications.",
-      availability: "Next available: Tomorrow",
-      verified: true,
-      topMentor: true
-    },
-    {
-      id: 3,
-      name: "Dr. Aisha Patel",
-      title: "Gates Scholar, Oxford DPhil",
-      expertise: ["Medical School", "Global Health", "Leadership"],
-      university: "Oxford University",
-      country: "United Kingdom",
-      rating: 5.0,
-      reviews: 89,
-      sessions: 234,
-      responseTime: "< 1 hour",
-      languages: ["English", "Hindi", "Gujarati"],
-      price: 80,
-      about: "Former Gates Scholar passionate about supporting underrepresented students in medicine and global health.",
-      availability: "Available this week",
-      verified: true,
-      topMentor: false
-    },
-    {
-      id: 4,
-      name: "Alexander Rodriguez",
-      title: "Marshall Scholar, LSE Graduate",
-      expertise: ["Business School", "Finance", "Entrepreneurship"],
-      university: "London School of Economics",
-      country: "United Kingdom",
-      rating: 4.7,
-      reviews: 156,
-      sessions: 389,
-      responseTime: "< 3 hours",
-      languages: ["English", "Spanish"],
-      price: 65,
-      about: "Marshall Scholar and successful entrepreneur. Helping students build compelling business school applications.",
-      availability: "Available this week",
-      verified: true,
-      topMentor: false
+const MentorMatching = () => {
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchMentors();
+  }, []);
+
+  const fetchMentors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('mentors')
+        .select('*')
+        .eq('available', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMentors(data || []);
+    } catch (error) {
+      console.error('Error fetching mentors:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load mentors. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleRequestMentorship = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to request mentorship.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedMentor) return;
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('mentorship_requests')
+        .insert({
+          user_id: user.id,
+          mentor_id: selectedMentor.id,
+          message: requestMessage,
+          status: 'Pending'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Request Sent!",
+        description: `Your mentorship request to ${selectedMentor.name} has been submitted.`,
+      });
+
+      setSelectedMentor(null);
+      setRequestMessage("");
+    } catch (error) {
+      console.error('Error submitting mentorship request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const mentorCategories = [
+    { name: "All Mentors", count: mentors.length, active: true },
+    { name: "STEM", count: mentors.filter(m => m.expertise?.includes("STEM")).length },
+    { name: "Arts & Humanities", count: mentors.filter(m => m.expertise?.includes("Arts")).length },
+    { name: "Business", count: mentors.filter(m => m.expertise?.includes("Business")).length },
+    { name: "Medicine", count: mentors.filter(m => m.expertise?.includes("Medicine")).length },
+    { name: "Law", count: mentors.filter(m => m.expertise?.includes("Law")).length }
   ];
 
   const matchingCriteria = [
@@ -213,107 +234,116 @@ const MentorMatching = () => {
         {/* Featured Mentors */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Featured Mentors</h2>
-            <Button variant="outline">View All Mentors</Button>
+            <h2 className="text-2xl font-bold text-foreground">Available Mentors</h2>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            {featuredMentors.map((mentor) => (
-              <Card key={mentor.id} className="border-border hover:shadow-card transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <div className="relative">
-                      <Avatar className="w-16 h-16">
-                        <AvatarFallback className="text-lg">
-                          {mentor.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      {mentor.verified && (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading mentors...</p>
+            </div>
+          ) : mentors.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No mentors available at the moment.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {mentors.map((mentor) => (
+                <Card key={mentor.id} className="border-border hover:shadow-card transition-all duration-300">
+                  <CardHeader>
+                    <div className="flex items-start gap-4">
+                      <div className="relative">
+                        <Avatar className="w-16 h-16">
+                          {mentor.avatar_url ? (
+                            <AvatarImage src={mentor.avatar_url} alt={mentor.name} />
+                          ) : (
+                            <AvatarFallback className="text-lg">
+                              {mentor.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
                         <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
                           <CheckCircle className="h-3 w-3 text-white" />
                         </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-card-foreground">
-                            {mentor.name}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-2">
-                            {mentor.title}
-                          </p>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium">{mentor.rating}</span>
-                              <span className="text-muted-foreground text-sm">
-                                ({mentor.reviews} reviews)
-                              </span>
-                            </div>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold text-card-foreground">
+                              {mentor.name}
+                            </h3>
+                            {mentor.title && (
+                              <p className="text-muted-foreground text-sm mb-2">
+                                {mentor.title}
+                              </p>
+                            )}
                           </div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-primary">${mentor.price}</div>
-                          <div className="text-sm text-muted-foreground">per session</div>
-                          {mentor.topMentor && (
-                            <Badge className="mt-1">Top Mentor</Badge>
-                          )}
+                          <Badge>Available</Badge>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {mentor.expertise.map((skill, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
+                  </CardHeader>
                   
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {mentor.about}
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {mentor.responseTime}
+                  <CardContent>
+                    {mentor.expertise && mentor.expertise.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {mentor.expertise.map((skill, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {mentor.bio && (
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                        {mentor.bio}
+                      </p>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="flex-1" onClick={() => setSelectedMentor(mentor)}>
+                            Request Mentorship
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Request Mentorship from {mentor.name}</DialogTitle>
+                            <DialogDescription>
+                              Send a message introducing yourself and explaining why you'd like to connect.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 mt-4">
+                            <Textarea
+                              placeholder="Tell the mentor about yourself and your goals..."
+                              value={requestMessage}
+                              onChange={(e) => setRequestMessage(e.target.value)}
+                              rows={5}
+                            />
+                            <Button 
+                              className="w-full" 
+                              onClick={handleRequestMentorship}
+                              disabled={submitting || !requestMessage.trim()}
+                            >
+                              <Send className="h-4 w-4 mr-2" />
+                              {submitting ? "Sending..." : "Send Request"}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      {mentor.contact_info && (
+                        <Button variant="outline" size="icon">
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {mentor.sessions} sessions
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {mentor.country}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {mentor.availability}
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button className="flex-1">
-                      Book Session
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Session Types */}
