@@ -39,12 +39,14 @@ const Header = () => {
             <a href="/pricing" className="text-muted-foreground hover:text-primary transition-colors">
               {t('pricing')}
             </a>
-            <a href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
+            
+            {/*<a href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
               {t('resources')}
             </a>
             <a href="/community" className="text-muted-foreground hover:text-primary transition-colors">
               {t('community')}
-            </a>
+            </a>*/}
+            
             <a href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
               {t('contact')}
             </a>

@@ -187,6 +187,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
           </div>
         </form>
         
+        {/*
         <div className="relative">
           <Separator />
           <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-sm text-muted-foreground">
@@ -199,6 +200,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
             Continue with Google
           </Button>
         </div>
+        */}
         
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{" "}
