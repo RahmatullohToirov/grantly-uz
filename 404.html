@@ -1,6 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta http-equiv="refresh" content="0; URL=/" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=/" />
+    <script type="text/javascript">
+      // Redirect all subpaths (e.g., /about, /contact) back to the SPA entry
+      const pathname = window.location.pathname;
+      if (pathname !== "/") {
+        window.location.replace("/#" + pathname);
+      }
+    </script>
   </head>
+  <body></body>
 </html>
