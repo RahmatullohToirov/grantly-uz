@@ -1,10 +1,18 @@
+import { Link } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import ChatBot from "@/components/ChatBot";
+import { 
+  useDashboardStats, 
+  useTrackedScholarships, 
+  useAIRecommendations 
+} from "@/hooks/useDashboardData";
+import { useToggleSaveScholarship } from "@/hooks/useScholarships";
 import { 
   BookmarkIcon, 
   ClockIcon, 
@@ -15,64 +23,54 @@ import {
   UsersIcon,
   FileTextIcon,
   GraduationCapIcon,
-  DollarSignIcon
+  DollarSignIcon,
+  Loader2
 } from "lucide-react";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const { user } = useAuth();
-
-  const scholarshipStats = {
-    saved: 12,
-    inProgress: 5,
-    accepted: 2,
-    rejected: 1
-  };
-
-  const recentOpportunities = [
-    {
-      id: 1,
-      title: "Gates Cambridge Scholarship",
-      deadline: "Dec 15, 2024",
-      amount: "$50,000",
-      status: "saved",
-      fitScore: 95
-    },
-    {
-      id: 2,
-      title: "Fulbright Program",
-      deadline: "Oct 12, 2024",
-      amount: "$30,000",
-      status: "in-progress",
-      fitScore: 88
-    },
-    {
-      id: 3,
-      title: "Rhodes Scholarship",
-      deadline: "Sep 30, 2024",
-      amount: "Full funding",
-      status: "accepted",
-      fitScore: 92
-    }
-  ];
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: trackedScholarships, isLoading: trackedLoading } = useTrackedScholarships();
+  const { data: recommendations, isLoading: recommendationsLoading } = useAIRecommendations();
+  const toggleSave = useToggleSaveScholarship();
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'saved': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('applied') || statusLower.includes('progress')) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+    if (statusLower.includes('accept')) return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+    if (statusLower.includes('reject')) return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'saved': return <BookmarkIcon className="h-4 w-4" />;
-      case 'in-progress': return <ClockIcon className="h-4 w-4" />;
-      case 'accepted': return <CheckCircleIcon className="h-4 w-4" />;
-      case 'rejected': return <XCircleIcon className="h-4 w-4" />;
-      default: return null;
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('applied') || statusLower.includes('progress')) return <ClockIcon className="h-4 w-4" />;
+    if (statusLower.includes('accept')) return <CheckCircleIcon className="h-4 w-4" />;
+    if (statusLower.includes('reject')) return <XCircleIcon className="h-4 w-4" />;
+    return <BookmarkIcon className="h-4 w-4" />;
+  };
+
+  const formatDeadline = (deadline: string | null) => {
+    if (!deadline) return 'No deadline';
+    try {
+      return format(new Date(deadline), 'MMM d, yyyy');
+    } catch {
+      return deadline;
     }
+  };
+
+  const formatAmount = (amount: number | null) => {
+    if (!amount) return 'Varies';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const handleSaveRecommendation = (scholarshipId: string) => {
+    toggleSave.mutate({ scholarshipId, isSaved: false });
   };
 
   return (
@@ -83,7 +81,7 @@ const Dashboard = () => {
         {/* Welcome Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome back, {user?.user_metadata?.first_name || 'Student'} 👋
+            Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student'} 👋
           </h1>
           <p className="text-muted-foreground">
             Track your scholarship journey and discover new opportunities
@@ -98,10 +96,16 @@ const Dashboard = () => {
               <BookmarkIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{scholarshipStats.saved}</div>
-              <p className="text-xs text-muted-foreground">
-                Scholarships bookmarked
-              </p>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.saved || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Scholarships bookmarked
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
           
@@ -111,10 +115,16 @@ const Dashboard = () => {
               <ClockIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{scholarshipStats.inProgress}</div>
-              <p className="text-xs text-muted-foreground">
-                Applications pending
-              </p>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.inProgress || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Applications pending
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
           
@@ -124,10 +134,16 @@ const Dashboard = () => {
               <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{scholarshipStats.accepted}</div>
-              <p className="text-xs text-muted-foreground">
-                Successful applications
-              </p>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.accepted || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Successful applications
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
           
@@ -137,10 +153,16 @@ const Dashboard = () => {
               <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">67%</div>
-              <p className="text-xs text-muted-foreground">
-                Above average
-              </p>
+              {statsLoading ? (
+                <Skeleton className="h-8 w-12" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{stats?.successRate || 0}%</div>
+                  <p className="text-xs text-muted-foreground">
+                    {(stats?.successRate || 0) >= 50 ? 'Above average' : 'Keep applying!'}
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -157,36 +179,58 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentOpportunities.map((scholarship) => (
-                    <div key={scholarship.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2 rounded-full ${getStatusColor(scholarship.status)}`}>
-                          {getStatusIcon(scholarship.status)}
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{scholarship.title}</h3>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <CalendarIcon className="h-3 w-3" />
-                            <span>Due: {scholarship.deadline}</span>
-                            <DollarSignIcon className="h-3 w-3 ml-2" />
-                            <span>{scholarship.amount}</span>
+                {trackedLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
+                  </div>
+                ) : trackedScholarships && trackedScholarships.length > 0 ? (
+                  <div className="space-y-4">
+                    {trackedScholarships.map((scholarship) => (
+                      <div key={scholarship.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-2 rounded-full ${getStatusColor(scholarship.status)}`}>
+                            {getStatusIcon(scholarship.status)}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{scholarship.title}</h3>
+                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <CalendarIcon className="h-3 w-3" />
+                              <span>Due: {formatDeadline(scholarship.deadline)}</span>
+                              <DollarSignIcon className="h-3 w-3 ml-2" />
+                              <span>{formatAmount(scholarship.amount)}</span>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs">
+                            {scholarship.matchScore}% match
+                          </Badge>
+                          <Link to="/scholarships">
+                            <Button variant="outline" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="text-xs">
-                          {scholarship.fitScore}% match
-                        </Badge>
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <GraduationCapIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No applications yet</p>
+                    <Link to="/scholarships">
+                      <Button className="mt-4" variant="outline">
+                        Browse Scholarships
+                      </Button>
+                    </Link>
+                  </div>
+                )}
                 <div className="mt-4">
-                  <Button className="w-full">View All Applications</Button>
+                  <Link to="/scholarships">
+                    <Button className="w-full">View All Applications</Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -203,9 +247,12 @@ const Dashboard = () => {
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span>Yearly Application Goal</span>
-                    <span>8/15 applications</span>
+                    <span>{(stats?.inProgress || 0) + (stats?.accepted || 0) + (stats?.rejected || 0)}/15 applications</span>
                   </div>
-                  <Progress value={53} className="h-2" />
+                  <Progress 
+                    value={Math.min(((stats?.inProgress || 0) + (stats?.accepted || 0) + (stats?.rejected || 0)) / 15 * 100, 100)} 
+                    className="h-2" 
+                  />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
@@ -229,25 +276,47 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-sm">Chevening Scholarship</h4>
-                  <p className="text-xs text-muted-foreground">UK Government scholarship</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <Badge variant="secondary" className="text-xs">94% match</Badge>
-                    <Button size="sm" variant="outline">Save</Button>
+                {recommendationsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map(i => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
                   </div>
-                </div>
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-sm">DAAD Scholarship</h4>
-                  <p className="text-xs text-muted-foreground">Study in Germany</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <Badge variant="secondary" className="text-xs">91% match</Badge>
-                    <Button size="sm" variant="outline">Save</Button>
+                ) : recommendations && recommendations.length > 0 ? (
+                  recommendations.slice(0, 3).map((rec) => (
+                    <div key={rec.id} className="border rounded-lg p-3">
+                      <h4 className="font-medium text-sm">{rec.title}</h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {rec.description || rec.location || 'Scholarship opportunity'}
+                      </p>
+                      <div className="flex justify-between items-center mt-2">
+                        <Badge variant="secondary" className="text-xs">{rec.matchScore}% match</Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleSaveRecommendation(rec.id)}
+                          disabled={toggleSave.isPending}
+                        >
+                          {toggleSave.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    <p>Complete your profile to get personalized recommendations</p>
+                    <Link to="/profile">
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Complete Profile
+                      </Button>
+                    </Link>
                   </div>
-                </div>
-                <Button variant="ghost" className="w-full text-sm">
-                  View All Recommendations
-                </Button>
+                )}
+                <Link to="/scholarships">
+                  <Button variant="ghost" className="w-full text-sm">
+                    View All Recommendations
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -257,18 +326,24 @@ const Dashboard = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <FileTextIcon className="mr-2 h-4 w-4" />
-                  Upload Documents
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <UsersIcon className="mr-2 h-4 w-4" />
-                  Book Mentorship
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <GraduationCapIcon className="mr-2 h-4 w-4" />
-                  Take Assessment
-                </Button>
+                <Link to="/profile">
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileTextIcon className="mr-2 h-4 w-4" />
+                    Upload Documents
+                  </Button>
+                </Link>
+                <Link to="/mentor-matching">
+                  <Button variant="outline" className="w-full justify-start">
+                    <UsersIcon className="mr-2 h-4 w-4" />
+                    Book Mentorship
+                  </Button>
+                </Link>
+                <Link to="/scholarships">
+                  <Button variant="outline" className="w-full justify-start">
+                    <GraduationCapIcon className="mr-2 h-4 w-4" />
+                    Browse Scholarships
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -289,9 +364,11 @@ const Dashboard = () => {
                   <p className="font-medium">New workshop available</p>
                   <p className="text-muted-foreground text-xs">Essay writing masterclass</p>
                 </div>
-                <Button variant="ghost" className="w-full text-sm">
-                  Join Community
-                </Button>
+                <Link to="/community">
+                  <Button variant="ghost" className="w-full text-sm">
+                    Join Community
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
