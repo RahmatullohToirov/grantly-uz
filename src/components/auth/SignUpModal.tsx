@@ -8,6 +8,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(50, "First name is too long"),
+  lastName: z.string().trim().min(1, "Last name is required").max(50, "Last name is too long"),
+  email: z.string().trim().email("Please enter a valid email address").max(255, "Email is too long"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password is too long")
+    .regex(/[A-Za-z]/, "Password must contain at least one letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+});
+
+type SignUpErrors = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+};
 
 interface SignUpModalProps {
   children: React.ReactNode;
@@ -24,6 +43,7 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [errors, setErrors] = useState<SignUpErrors>({});
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,10 +52,16 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (errors[name as keyof SignUpErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
     if (!agreeToTerms) {
       toast({
         title: "Terms required",
@@ -45,17 +71,28 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
       return;
     }
 
+    const result = signUpSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: SignUpErrors = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof SignUpErrors;
+        if (!fieldErrors[field]) fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: result.data.email,
+        password: result.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
+            first_name: result.data.firstName,
+            last_name: result.data.lastName,
           }
         }
       });
@@ -144,11 +181,11 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
                   placeholder="John"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className="pl-10"
-                  required
+                  className={`pl-10 ${errors.firstName ? "border-destructive" : ""}`}
                   disabled={loading}
                 />
               </div>
+              {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
@@ -161,11 +198,11 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
                   placeholder="Doe"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="pl-10"
-                  required
+                  className={`pl-10 ${errors.lastName ? "border-destructive" : ""}`}
                   disabled={loading}
                 />
               </div>
+              {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
             </div>
           </div>
           
@@ -180,11 +217,11 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="pl-10"
-                required
+                className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                 disabled={loading}
               />
             </div>
+            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
           </div>
           
           <div className="space-y-2">
@@ -198,8 +235,7 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
                 placeholder="Create a strong password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="pl-10 pr-10"
-                required
+                className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
                 disabled={loading}
               />
               <button
@@ -211,6 +247,8 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+            <p className="text-xs text-muted-foreground">Min 8 characters with letters and numbers</p>
           </div>
           
           <div className="flex items-center space-x-2">
