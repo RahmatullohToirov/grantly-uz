@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import Pricing from "./pages/Pricing";
 import VideoLearning from "./pages/VideoLearning";
 import MentorMatching from "./pages/MentorMatching";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,9 @@ export default () => (
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
                 <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+                
+                {/* Admin route - role check is done inside the component */}
+                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                 
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
