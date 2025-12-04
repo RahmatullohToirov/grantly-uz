@@ -7,6 +7,12 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const signInSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address").max(255, "Email is too long"),
+  password: z.string().min(1, "Password is required").max(128, "Password is too long"),
+});
 
 interface SignInModalProps {
   children: React.ReactNode;
@@ -18,16 +24,30 @@ const SignInModal = ({ children }: SignInModalProps) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    const result = signInSchema.safeParse({ email, password });
+    if (!result.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0] === "email") fieldErrors.email = err.message;
+        if (err.path[0] === "password") fieldErrors.password = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: result.data.email,
+        password: result.data.password,
       });
 
       if (error) {
@@ -140,11 +160,11 @@ const SignInModal = ({ children }: SignInModalProps) => {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                required
+                className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                 disabled={loading}
               />
             </div>
+            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
           </div>
           
           <div className="space-y-2">
@@ -157,8 +177,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
-                required
+                className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
                 disabled={loading}
               />
               <button
@@ -170,6 +189,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
           </div>
           
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
