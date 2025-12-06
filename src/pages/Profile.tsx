@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,21 +9,54 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  GraduationCap, 
-  FileText, 
-  Upload,
-  Download,
-  Trash2,
-  Edit
-} from "lucide-react";
+import { useProfile, useUpdateProfile, ProfileFormData } from "@/hooks/useProfile";
+import { Loader2, Upload, Download, Trash2, Edit, FileText, Save } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
+  const { data: profile, isLoading: profileLoading } = useProfile();
+  const updateProfile = useUpdateProfile();
+
+  const [formData, setFormData] = useState<ProfileFormData>({
+    full_name: '',
+    bio: '',
+    location: '',
+    education_level: '',
+    field_of_study: '',
+  });
+
+  // Load profile data into form when it's fetched
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || user?.user_metadata?.full_name || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        education_level: profile.education_level || '',
+        field_of_study: profile.field_of_study || '',
+      });
+    } else if (user) {
+      // Use user metadata as fallback
+      setFormData(prev => ({
+        ...prev,
+        full_name: user.user_metadata?.first_name 
+          ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim()
+          : user.user_metadata?.full_name || '',
+      }));
+    }
+  }, [profile, user]);
+
+  const handleInputChange = (field: keyof ProfileFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSavePersonalInfo = async () => {
+    await updateProfile.mutateAsync(formData);
+  };
+
+  const handleSaveAcademicInfo = async () => {
+    await updateProfile.mutateAsync(formData);
+  };
 
   const documents = [
     {
@@ -47,6 +81,17 @@ const Profile = () => {
       size: "892 KB"
     }
   ];
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardHeader />
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,9 +128,9 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center space-y-4">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
+                    <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url} alt={user?.email} />
                     <AvatarFallback className="text-lg">
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      {formData.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <Button variant="outline" size="sm">
@@ -105,23 +150,14 @@ const Profile = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                          id="firstName"
-                          defaultValue={user?.user_metadata?.first_name || ""}
-                          placeholder="Enter your first name"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          defaultValue={user?.user_metadata?.last_name || ""}
-                          placeholder="Enter your last name"
-                        />
-                      </div>
+                    <div>
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        value={formData.full_name}
+                        onChange={(e) => handleInputChange('full_name', e.target.value)}
+                        placeholder="Enter your full name"
+                      />
                     </div>
                     
                     <div>
@@ -133,35 +169,52 @@ const Profile = () => {
                         disabled
                         className="bg-muted"
                       />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          placeholder="+1 (555) 000-0000"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                        <Input
-                          id="dateOfBirth"
-                          type="date"
-                        />
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Email cannot be changed
+                      </p>
                     </div>
                     
                     <div>
-                      <Label htmlFor="address">Address</Label>
-                      <Textarea
-                        id="address"
-                        placeholder="Enter your full address"
-                        rows={3}
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        value={formData.location || ''}
+                        onChange={(e) => handleInputChange('location', e.target.value)}
+                        placeholder="e.g., Tashkent, Uzbekistan"
                       />
                     </div>
                     
-                    <Button>Save Changes</Button>
+                    <div>
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={formData.bio || ''}
+                        onChange={(e) => handleInputChange('bio', e.target.value)}
+                        placeholder="Tell us about yourself..."
+                        rows={3}
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(formData.bio?.length || 0)}/500 characters
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleSavePersonalInfo}
+                      disabled={updateProfile.isPending}
+                    >
+                      {updateProfile.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -173,71 +226,47 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle>Academic Information</CardTitle>
                 <CardDescription>
-                  Add your educational background and achievements
+                  Add your educational background - this helps us match you with relevant scholarships
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="currentLevel">Current Education Level</Label>
                     <Input
                       id="currentLevel"
-                      placeholder="e.g., Bachelor's Degree"
+                      value={formData.education_level || ''}
+                      onChange={(e) => handleInputChange('education_level', e.target.value)}
+                      placeholder="e.g., Bachelor's Degree, High School"
                     />
                   </div>
                   <div>
                     <Label htmlFor="fieldOfStudy">Field of Study</Label>
                     <Input
                       id="fieldOfStudy"
-                      placeholder="e.g., Computer Science"
+                      value={formData.field_of_study || ''}
+                      onChange={(e) => handleInputChange('field_of_study', e.target.value)}
+                      placeholder="e.g., Computer Science, Medicine"
                     />
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="institution">Current Institution</Label>
-                    <Input
-                      id="institution"
-                      placeholder="e.g., MIT"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="gpa">GPA</Label>
-                    <Input
-                      id="gpa"
-                      placeholder="e.g., 3.8/4.0"
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="graduationYear">Expected Graduation</Label>
-                    <Input
-                      id="graduationYear"
-                      type="date"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="academicHonors">Academic Honors</Label>
-                    <Input
-                      id="academicHonors"
-                      placeholder="e.g., Dean's List, Magna Cum Laude"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="researchInterests">Research Interests</Label>
-                  <Textarea
-                    id="researchInterests"
-                    placeholder="Describe your research interests and goals"
-                    rows={3}
-                  />
-                </div>
-                
-                <Button>Save Academic Info</Button>
+                <Button 
+                  onClick={handleSaveAcademicInfo}
+                  disabled={updateProfile.isPending}
+                >
+                  {updateProfile.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Academic Info
+                    </>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -247,7 +276,7 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle>Document Management</CardTitle>
                 <CardDescription>
-                  Upload and manage your application documents
+                  Upload and manage your application documents (Coming soon)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -258,34 +287,37 @@ const Profile = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Drag and drop files here, or click to browse
                     </p>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" disabled>
                       Choose Files
                     </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Document upload will be available soon
+                    </p>
                   </div>
                 </div>
 
-                {/* Document List */}
+                {/* Document List - Placeholder */}
                 <div className="space-y-3">
                   <h4 className="font-medium">Uploaded Documents</h4>
                   {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg opacity-50">
                       <div className="flex items-center space-x-3">
                         <FileText className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium text-sm">{doc.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {doc.type} • {doc.size} • Uploaded {doc.uploadDate}
+                            {doc.type} • {doc.size} • Sample data
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" disabled>
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" disabled>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" disabled>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -301,7 +333,7 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle>Scholarship Preferences</CardTitle>
                 <CardDescription>
-                  Set your scholarship search preferences
+                  Set your scholarship search preferences (Coming soon)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -311,7 +343,7 @@ const Profile = () => {
                     <Badge variant="secondary">United States</Badge>
                     <Badge variant="secondary">United Kingdom</Badge>
                     <Badge variant="secondary">Canada</Badge>
-                    <Button variant="outline" size="sm">+ Add Country</Button>
+                    <Button variant="outline" size="sm" disabled>+ Add Country</Button>
                   </div>
                 </div>
                 
@@ -320,7 +352,7 @@ const Profile = () => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     <Badge variant="secondary">Computer Science</Badge>
                     <Badge variant="secondary">Engineering</Badge>
-                    <Button variant="outline" size="sm">+ Add Field</Button>
+                    <Button variant="outline" size="sm" disabled>+ Add Field</Button>
                   </div>
                 </div>
                 
@@ -330,11 +362,13 @@ const Profile = () => {
                     <Badge variant="secondary">Fully Funded</Badge>
                     <Badge variant="secondary">Partial Funding</Badge>
                     <Badge variant="secondary">Merit-based</Badge>
-                    <Button variant="outline" size="sm">+ Add Type</Button>
+                    <Button variant="outline" size="sm" disabled>+ Add Type</Button>
                   </div>
                 </div>
                 
-                <Button>Save Preferences</Button>
+                <p className="text-sm text-muted-foreground">
+                  Preference customization will be available soon
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
