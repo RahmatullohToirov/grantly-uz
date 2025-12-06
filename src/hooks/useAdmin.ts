@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 export interface Scholarship {
   id: string;
@@ -18,18 +19,21 @@ export interface Scholarship {
   created_at: string | null;
 }
 
-export interface ScholarshipInput {
-  title: string;
-  description?: string;
-  amount?: number;
-  deadline?: string;
-  location?: string;
-  category?: string;
-  link?: string;
-  requirements?: string;
-  source_name?: string;
-  source_url?: string;
-}
+// Zod schema for scholarship validation
+export const scholarshipSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required').max(500, 'Title must be less than 500 characters'),
+  description: z.string().max(5000, 'Description must be less than 5000 characters').optional().or(z.literal('')),
+  amount: z.number().positive('Amount must be positive').optional().nullable(),
+  deadline: z.string().optional().or(z.literal('')),
+  location: z.string().max(100, 'Location must be less than 100 characters').optional().or(z.literal('')),
+  category: z.string().max(50).optional().or(z.literal('')),
+  link: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
+  requirements: z.string().max(2000, 'Requirements must be less than 2000 characters').optional().or(z.literal('')),
+  source_name: z.string().max(200, 'Source name must be less than 200 characters').optional().or(z.literal('')),
+  source_url: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
+});
+
+export type ScholarshipInput = z.infer<typeof scholarshipSchema>;
 
 export const useIsAdmin = () => {
   const { user } = useAuth();
@@ -73,9 +77,23 @@ export const useCreateScholarship = () => {
   
   return useMutation({
     mutationFn: async (scholarship: ScholarshipInput) => {
+      // Validate input
+      const validated = scholarshipSchema.parse(scholarship);
+      
       const { data, error } = await supabase
         .from('scholarships')
-        .insert([scholarship])
+        .insert([{
+          title: validated.title,
+          description: validated.description || null,
+          amount: validated.amount || null,
+          deadline: validated.deadline || null,
+          location: validated.location || null,
+          category: validated.category || null,
+          link: validated.link || null,
+          requirements: validated.requirements || null,
+          source_name: validated.source_name || null,
+          source_url: validated.source_url || null,
+        }])
         .select()
         .single();
       
@@ -89,7 +107,12 @@ export const useCreateScholarship = () => {
     },
     onError: (error) => {
       console.error('Error creating scholarship:', error);
-      toast.error('Failed to create scholarship');
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        toast.error(firstError.message);
+      } else {
+        toast.error('Failed to create scholarship');
+      }
     },
   });
 };
@@ -99,9 +122,23 @@ export const useUpdateScholarship = () => {
   
   return useMutation({
     mutationFn: async ({ id, ...scholarship }: ScholarshipInput & { id: string }) => {
+      // Validate input
+      const validated = scholarshipSchema.parse(scholarship);
+      
       const { data, error } = await supabase
         .from('scholarships')
-        .update(scholarship)
+        .update({
+          title: validated.title,
+          description: validated.description || null,
+          amount: validated.amount || null,
+          deadline: validated.deadline || null,
+          location: validated.location || null,
+          category: validated.category || null,
+          link: validated.link || null,
+          requirements: validated.requirements || null,
+          source_name: validated.source_name || null,
+          source_url: validated.source_url || null,
+        })
         .eq('id', id)
         .select()
         .single();
@@ -116,7 +153,12 @@ export const useUpdateScholarship = () => {
     },
     onError: (error) => {
       console.error('Error updating scholarship:', error);
-      toast.error('Failed to update scholarship');
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        toast.error(firstError.message);
+      } else {
+        toast.error('Failed to update scholarship');
+      }
     },
   });
 };
