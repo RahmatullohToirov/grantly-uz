@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle, Menu, X } from "lucide-react";
+import { Bell, Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useIsAdmin } from "@/hooks/useAdmin";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ const DashboardHeader = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: isAdmin } = useIsAdmin();
 
   const handleSignOut = async () => {
     await signOut();
@@ -120,6 +122,12 @@ const DashboardHeader = () => {
                   <BarChart3 className="mr-2 h-4 w-4" />
                   <span>{t('dashboard')}</span>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Admin Panel</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
@@ -188,6 +196,19 @@ const DashboardHeader = () => {
                 <User className="mr-2 h-5 w-5" />
                 <span>{t('profile')}</span>
               </Button>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    navigate("/admin");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <Shield className="mr-2 h-5 w-5" />
+                  <span>Admin Panel</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
