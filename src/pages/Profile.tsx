@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile, useUpdateProfile, ProfileFormData } from "@/hooks/useProfile";
-import { Loader2, Upload, Download, Trash2, Edit, FileText, Save } from "lucide-react";
+import { Loader2, Upload, Save } from "lucide-react";
+import { DocumentUpload } from "@/components/DocumentUpload";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -58,30 +60,6 @@ const Profile = () => {
     await updateProfile.mutateAsync(formData);
   };
 
-  const documents = [
-    {
-      id: 1,
-      name: "Resume.pdf",
-      type: "Resume/CV",
-      uploadDate: "2024-01-15",
-      size: "245 KB"
-    },
-    {
-      id: 2,
-      name: "Statement_of_Purpose.pdf",
-      type: "Statement of Purpose",
-      uploadDate: "2024-01-20",
-      size: "156 KB"
-    },
-    {
-      id: 3,
-      name: "Transcript.pdf",
-      type: "Academic Transcript",
-      uploadDate: "2024-01-10",
-      size: "892 KB"
-    }
-  ];
-
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -113,6 +91,7 @@ const Profile = () => {
             <TabsTrigger value="personal">Personal Info</TabsTrigger>
             <TabsTrigger value="academic">Academic</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="preferences">Preferences</TabsTrigger>
           </TabsList>
 
@@ -272,60 +251,11 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Document Management</CardTitle>
-                <CardDescription>
-                  Upload and manage your application documents (Coming soon)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Upload Section */}
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 mb-6">
-                  <div className="text-center">
-                    <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Drag and drop files here, or click to browse
-                    </p>
-                    <Button variant="outline" size="sm" disabled>
-                      Choose Files
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Document upload will be available soon
-                    </p>
-                  </div>
-                </div>
+            <DocumentUpload />
+          </TabsContent>
 
-                {/* Document List - Placeholder */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">Uploaded Documents</h4>
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg opacity-50">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium text-sm">{doc.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {doc.type} • {doc.size} • Sample data
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" disabled>
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" disabled>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" disabled>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="notifications" className="space-y-6">
+            <NotificationSettings />
           </TabsContent>
 
           <TabsContent value="preferences" className="space-y-6">

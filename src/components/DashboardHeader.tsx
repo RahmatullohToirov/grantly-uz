@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle, Menu, X, Shield } from "lucide-react";
+import { Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsAdmin } from "@/hooks/useAdmin";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,9 +76,9 @@ const DashboardHeader = () => {
               <LanguageSwitcher />
             </div>
             
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <div className="hidden sm:inline-flex">
+              <NotificationBell />
+            </div>
             
             {/* Mobile menu button - Always visible on mobile */}
             <Button 
