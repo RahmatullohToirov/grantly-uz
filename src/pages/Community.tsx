@@ -1,5 +1,4 @@
 import DashboardHeader from "@/components/DashboardHeader";
-import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -610,7 +609,6 @@ const Community = () => {
           </div>
         </section>
       </main>
-      <Footer />
       <ChatBot />
     </div>
   );

@@ -14,6 +14,7 @@ import {
 } from "@/hooks/useDashboardData";
 import { useToggleSaveScholarship } from "@/hooks/useScholarships";
 import { useProfileCompleteness } from "@/hooks/useProfileCompleteness";
+import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { DeadlineCalendar } from "@/components/DeadlineCalendar";
 import { 
@@ -33,11 +34,18 @@ import { format } from "date-fns";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: trackedScholarships, isLoading: trackedLoading } = useTrackedScholarships();
   const { data: recommendations, isLoading: recommendationsLoading } = useAIRecommendations();
   const toggleSave = useToggleSaveScholarship();
   const completeness = useProfileCompleteness();
+
+  // Get display name from profile or fallback to user metadata
+  const displayName = profile?.full_name || 
+    (user?.user_metadata?.first_name 
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim() 
+      : 'Student');
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
@@ -84,8 +92,8 @@ const Dashboard = () => {
       <main className="container mx-auto px-6 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student'} 👋
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Welcome back, {displayName} 👋
           </h1>
           <p className="text-muted-foreground">
             Track your scholarship journey and discover new opportunities

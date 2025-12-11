@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useScholarships, useSavedScholarships, useToggleSaveScholarship, useAddApplication, type Scholarship } from "@/hooks/useScholarships";
 import { useAIRecommendations } from "@/hooks/useDashboardData";
+import { useEnhancedProfile, calculateEnhancedMatchScore, type MatchResult } from "@/hooks/useEnhancedMatching";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, isAfter, addDays } from "date-fns";
 import { 
@@ -20,7 +23,9 @@ import {
   DollarSignIcon,
   GraduationCapIcon,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  AlertCircle,
+  CheckCircle2
 } from "lucide-react";
 
 const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, isAddingToTracker }: {
@@ -161,10 +166,12 @@ const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, 
 
 const Scholarships = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showEligibleOnly, setShowEligibleOnly] = useState(false);
   const { user } = useAuth();
   const { data: scholarships, isLoading } = useScholarships(searchQuery);
   const { data: savedScholarships, isLoading: savedLoading } = useSavedScholarships();
   const { data: recommendations, isLoading: recommendationsLoading } = useAIRecommendations();
+  const { data: enhancedProfile } = useEnhancedProfile();
   const toggleSave = useToggleSaveScholarship();
   const addApplication = useAddApplication();
 
@@ -178,8 +185,24 @@ const Scholarships = () => {
     addApplication.mutate({ scholarshipId });
   };
 
+  // Calculate eligibility for all scholarships
+  const scholarshipsWithEligibility = scholarships?.map(s => {
+    const result = calculateEnhancedMatchScore(enhancedProfile || null, s as any);
+    return {
+      ...s,
+      matchScore: result.matchScore,
+      isEligible: result.isEligible,
+      ineligibilityReasons: result.ineligibilityReasons,
+    };
+  }) || [];
+
+  // Filter by eligibility if enabled
+  const filteredScholarships = showEligibleOnly 
+    ? scholarshipsWithEligibility.filter(s => s.isEligible)
+    : scholarshipsWithEligibility;
+
   // Filter scholarships with upcoming deadlines (next 30 days)
-  const upcomingDeadlines = scholarships?.filter(s => {
+  const upcomingDeadlines = filteredScholarships.filter(s => {
     if (!s.deadline) return false;
     try {
       const deadline = new Date(s.deadline);
@@ -188,7 +211,9 @@ const Scholarships = () => {
     } catch {
       return false;
     }
-  }) || [];
+  });
+
+  const eligibleCount = scholarshipsWithEligibility.filter(s => s.isEligible).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,11 +242,37 @@ const Scholarships = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="md:w-auto">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="eligible-filter"
+                  checked={showEligibleOnly}
+                  onCheckedChange={setShowEligibleOnly}
+                />
+                <Label htmlFor="eligible-filter" className="text-sm whitespace-nowrap">
+                  Eligible only ({eligibleCount})
+                </Label>
+              </div>
+              <Button variant="outline" className="md:w-auto">
+                <Filter className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </div>
           </div>
+          
+          {showEligibleOnly && !enhancedProfile && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <span className="text-amber-800 dark:text-amber-200">
+                Complete your profile to get accurate eligibility filtering.
+              </span>
+              <Link to="/profile">
+                <Button variant="link" size="sm" className="text-amber-700 dark:text-amber-300 p-0 h-auto">
+                  Update Profile
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
@@ -240,23 +291,39 @@ const Scholarships = () => {
                   <Skeleton key={i} className="h-64 w-full" />
                 ))}
               </div>
-            ) : scholarships && scholarships.length > 0 ? (
-              scholarships.map((scholarship) => (
-                <ScholarshipCard
-                  key={scholarship.id}
-                  scholarship={scholarship}
-                  onToggleSave={handleToggleSave}
-                  onAddToTracker={handleAddToTracker}
-                  isSaving={toggleSave.isPending}
-                  isAddingToTracker={addApplication.isPending}
-                />
-              ))
+            ) : filteredScholarships && filteredScholarships.length > 0 ? (
+              <>
+                {showEligibleOnly && (
+                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 mb-4">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Showing {filteredScholarships.length} scholarships you're eligible for
+                  </div>
+                )}
+                {filteredScholarships.map((scholarship) => (
+                  <div key={scholarship.id} className="relative">
+                    {!scholarship.isEligible && !showEligibleOnly && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground text-xs">
+                          May not be eligible
+                        </Badge>
+                      </div>
+                    )}
+                    <ScholarshipCard
+                      scholarship={scholarship}
+                      onToggleSave={handleToggleSave}
+                      onAddToTracker={handleAddToTracker}
+                      isSaving={toggleSave.isPending}
+                      isAddingToTracker={addApplication.isPending}
+                    />
+                  </div>
+                ))}
+              </>
             ) : (
               <div className="text-center py-12">
                 <GraduationCapIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                 <h3 className="text-lg font-semibold mb-2">No scholarships found</h3>
                 <p className="text-muted-foreground">
-                  {searchQuery ? 'Try a different search term' : 'Check back later for new opportunities'}
+                  {searchQuery ? 'Try a different search term' : showEligibleOnly ? 'Try updating your profile or disable the eligibility filter' : 'Check back later for new opportunities'}
                 </p>
               </div>
             )}
