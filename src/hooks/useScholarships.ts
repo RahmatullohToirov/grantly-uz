@@ -18,6 +18,16 @@ export interface Scholarship {
   matchScore: number;
   isSaved: boolean;
   isApplied: boolean;
+  // Extended fields for matching
+  eligible_genders?: string[] | null;
+  min_age?: number | null;
+  max_age?: number | null;
+  eligible_nationalities?: string[] | null;
+  eligible_countries?: string[] | null;
+  min_gpa?: number | null;
+  eligible_education_levels?: string[] | null;
+  eligible_fields?: string[] | null;
+  financial_need_required?: boolean | null;
 }
 
 export const useScholarships = (searchQuery?: string) => {
@@ -82,7 +92,16 @@ export const useScholarships = (searchQuery?: string) => {
         source_name: s.source_name,
         matchScore: calculateMatchScore(profile, s),
         isSaved: savedIds.includes(s.id),
-        isApplied: appliedIds.includes(s.id)
+        isApplied: appliedIds.includes(s.id),
+        eligible_genders: s.eligible_genders,
+        min_age: s.min_age,
+        max_age: s.max_age,
+        eligible_nationalities: s.eligible_nationalities,
+        eligible_countries: s.eligible_countries,
+        min_gpa: s.min_gpa,
+        eligible_education_levels: s.eligible_education_levels,
+        eligible_fields: s.eligible_fields,
+        financial_need_required: s.financial_need_required,
       }));
     }
   });

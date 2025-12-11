@@ -1,3 +1,4 @@
+import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
@@ -29,11 +30,22 @@ import {
   Globe,
   Brain,
   Users,
-  Bell
+  Bell,
+  Scale,
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
+import AIApplicationAdviser from "@/components/tools/AIApplicationAdviser";
+import ScholarshipComparisonTool from "@/components/tools/ScholarshipComparisonTool";
+import AIEssayBuilder from "@/components/tools/AIEssayBuilder";
+import ApplicationTracker from "@/components/tools/ApplicationTracker";
+import EssayAnalyzer from "@/components/tools/EssayAnalyzer";
+import GPACalculator from "@/components/tools/GPACalculator";
+import ScholarshipFinder from "@/components/tools/ScholarshipFinder";
 
 const Resources = () => {
   const { toast } = useToast();
+  const [openTool, setOpenTool] = useState<string | null>(null);
 
   const handleDownload = (resourceName: string) => {
     toast({
@@ -218,30 +230,13 @@ const Resources = () => {
   ];
 
   const quickTools = [
-    {
-      name: "Application Tracker",
-      description: "Track deadlines and progress",
-      icon: Calendar,
-      color: "bg-blue-100 text-blue-600"
-    },
-    {
-      name: "Essay Analyzer",
-      description: "AI-powered essay feedback",
-      icon: Brain,
-      color: "bg-purple-100 text-purple-600"
-    },
-    {
-      name: "GPA Calculator",
-      description: "Calculate and convert grades",
-      icon: Calculator,
-      color: "bg-green-100 text-green-600"
-    },
-    {
-      name: "Scholarship Finder",
-      description: "Personalized recommendations",
-      icon: Search,
-      color: "bg-orange-100 text-orange-600"
-    }
+    { name: "AI Application Adviser", description: "Chat with AI for guidance", icon: Sparkles, color: "bg-gradient-to-br from-primary/20 to-secondary/20 text-primary", toolKey: "adviser" },
+    { name: "Scholarship Comparison", description: "Compare scholarships side-by-side", icon: Scale, color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400", toolKey: "comparison" },
+    { name: "AI Essay Builder", description: "Build compelling essays", icon: PenTool, color: "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400", toolKey: "essay-builder" },
+    { name: "Application Tracker", description: "Track deadlines and progress", icon: Calendar, color: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400", toolKey: "tracker" },
+    { name: "Essay Analyzer", description: "AI-powered essay feedback", icon: Brain, color: "bg-pink-100 text-pink-600 dark:bg-pink-950 dark:text-pink-400", toolKey: "essay-analyzer" },
+    { name: "GPA Calculator", description: "Calculate and convert grades", icon: Calculator, color: "bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400", toolKey: "gpa" },
+    { name: "Scholarship Finder", description: "Personalized recommendations", icon: Search, color: "bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400", toolKey: "finder" },
   ];
 
   return (
