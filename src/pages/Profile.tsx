@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,12 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useProfileCompleteness } from "@/hooks/useProfileCompleteness";
-import { Loader2, Upload, Save, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import { Loader2, Upload, Save, AlertCircle, CheckCircle2, Mail, MailCheck } from "lucide-react";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { NotificationSettings } from "@/components/NotificationSettings";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh", 
@@ -86,6 +89,9 @@ const Profile = () => {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const updateProfile = useUpdateProfile();
   const completeness = useProfileCompleteness();
+  const { uploadAvatar, uploading: avatarUploading } = useAvatarUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [sendingVerification, setSendingVerification] = useState(false);
 
   const [formData, setFormData] = useState<ProfileFormData>({
     full_name: '',
@@ -152,6 +158,32 @@ const Profile = () => {
     };
     await updateProfile.mutateAsync(dataToSave as any);
   };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadAvatar(file);
+    }
+  };
+
+  const handleSendVerificationEmail = async () => {
+    if (!user?.email) return;
+    setSendingVerification(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+      });
+      if (error) throw error;
+      toast.success('Verification email sent! Check your inbox.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send verification email');
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
+  const isEmailVerified = user?.email_confirmed_at !== null;
 
   if (profileLoading) {
     return (
@@ -246,10 +278,28 @@ const Profile = () => {
                       {formData.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" size="sm">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Photo
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={avatarUploading}
+                  >
+                    {avatarUploading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</>
+                    ) : (
+                      <><Upload className="mr-2 h-4 w-4" />Upload Photo</>
+                    )}
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    JPG, PNG or GIF. Max 5MB.
+                  </p>
                 </CardContent>
               </Card>
 
@@ -272,14 +322,39 @@ const Profile = () => {
                     
                     <div>
                       <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        defaultValue={user?.email || ""}
-                        disabled
-                        className="bg-muted"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+                      <div className="flex gap-2">
+                        <Input
+                          id="email"
+                          type="email"
+                          defaultValue={user?.email || ""}
+                          disabled
+                          className="bg-muted flex-1"
+                        />
+                        {isEmailVerified ? (
+                          <div className="flex items-center text-green-600 dark:text-green-400 text-sm">
+                            <MailCheck className="h-4 w-4 mr-1" />
+                            Verified
+                          </div>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={handleSendVerificationEmail}
+                            disabled={sendingVerification}
+                          >
+                            {sendingVerification ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <><Mail className="h-4 w-4 mr-1" />Verify</>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {isEmailVerified 
+                          ? "Your email is verified" 
+                          : "Please verify your email to receive notifications"}
+                      </p>
                     </div>
                     
                     <div>
