@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Home, Search, BarChart3, Users, BookOpen, User, LogOut, PlayCircle, MessageCircle, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -20,10 +21,18 @@ import {
 
 const DashboardHeader = () => {
   const { user, signOut } = useAuth();
+  const { data: profile } = useProfile();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
+
+  // Get display name from profile first, then user metadata
+  const displayName = profile?.full_name || 
+    (user?.user_metadata?.first_name 
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim() 
+      : '');
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
 
   const handleSignOut = async () => {
     await signOut();
@@ -96,9 +105,9 @@ const DashboardHeader = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full hidden sm:inline-flex">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
+                    <AvatarImage src={avatarUrl} alt={displayName || user?.email} />
                     <AvatarFallback>
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -107,7 +116,7 @@ const DashboardHeader = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
+                      {displayName || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user?.email}
@@ -156,14 +165,14 @@ const DashboardHeader = () => {
             {/* User Info on Mobile - Only on smallest screens */}
             <div className="flex items-center space-x-3 pb-3 border-b border-border sm:hidden">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email} />
+                <AvatarImage src={avatarUrl} alt={displayName || user?.email} />
                 <AvatarFallback>
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  {displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
+                  {displayName || 'User'}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {user?.email}
