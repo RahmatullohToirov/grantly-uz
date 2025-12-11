@@ -292,17 +292,21 @@ const Resources = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {quickTools.map((tool, index) => (
-                <Card key={index} className="bg-card border-border hover:shadow-soft transition-all duration-300 hover:scale-105 cursor-pointer animate-fade-in">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 rounded-2xl ${tool.color} flex items-center justify-center mx-auto mb-4`}>
-                      <tool.icon className="h-8 w-8" />
+                <Card 
+                  key={index} 
+                  className="bg-card border-border hover:shadow-soft transition-all duration-300 hover:scale-105 cursor-pointer animate-fade-in"
+                  onClick={() => setOpenTool(tool.toolKey)}
+                >
+                  <CardContent className="p-4 md:p-6 text-center">
+                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl ${tool.color} flex items-center justify-center mx-auto mb-3 md:mb-4`}>
+                      <tool.icon className="h-6 w-6 md:h-8 md:w-8" />
                     </div>
-                    <h3 className="font-semibold text-card-foreground mb-2">
+                    <h3 className="font-semibold text-card-foreground mb-1 md:mb-2 text-sm md:text-base">
                       {tool.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       {tool.description}
                     </p>
                   </CardContent>
@@ -600,6 +604,15 @@ const Resources = () => {
         </section>
       </main>
       <ChatBot />
+
+      {/* Tool Dialogs */}
+      <AIApplicationAdviser open={openTool === "adviser"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ScholarshipComparisonTool open={openTool === "comparison"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <AIEssayBuilder open={openTool === "essay-builder"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ApplicationTracker open={openTool === "tracker"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <EssayAnalyzer open={openTool === "essay-analyzer"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <GPACalculator open={openTool === "gpa"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ScholarshipFinder open={openTool === "finder"} onOpenChange={(open) => !open && setOpenTool(null)} />
     </div>
   );
 };
