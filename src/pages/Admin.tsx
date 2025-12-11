@@ -15,10 +15,11 @@ import {
   Scholarship,
   ScholarshipInput,
 } from '@/hooks/useAdmin';
+import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -34,6 +35,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -44,6 +46,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   GraduationCap,
   Users,
@@ -54,6 +57,9 @@ import {
   Shield,
   Loader2,
   ShieldAlert,
+  TrendingUp,
+  Clock,
+  Search,
 } from 'lucide-react';
 
 const Admin = () => {
@@ -383,22 +389,33 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="scholarships" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Manage Scholarships</h2>
-              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Scholarship
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Create New Scholarship</DialogTitle>
-                  </DialogHeader>
-                  <ScholarshipForm />
-                </DialogContent>
-              </Dialog>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">Manage Scholarships</h2>
+                <p className="text-sm text-muted-foreground">
+                  Add scholarships manually or upload in bulk from CSV/JSON files
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <BulkScholarshipUpload />
+                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Manually
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Create New Scholarship</DialogTitle>
+                      <DialogDescription>
+                        Add a single scholarship with all details
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ScholarshipForm />
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
 
             {scholarshipsLoading ? (

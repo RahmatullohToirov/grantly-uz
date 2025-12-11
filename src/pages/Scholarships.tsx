@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { ScholarshipDetailModal } from "@/components/ScholarshipDetailModal";
 import { useScholarships, useSavedScholarships, useToggleSaveScholarship, useAddApplication, type Scholarship } from "@/hooks/useScholarships";
 import { useAIRecommendations } from "@/hooks/useDashboardData";
 import { useEnhancedProfile, calculateEnhancedMatchScore, type MatchResult } from "@/hooks/useEnhancedMatching";
@@ -25,29 +27,57 @@ import {
   Loader2,
   ExternalLink,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Clock,
+  Eye,
+  TrendingUp,
+  Users,
+  Globe,
 } from "lucide-react";
 
-const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, isAddingToTracker }: {
-  scholarship: Scholarship;
+interface ExtendedScholarship extends Scholarship {
+  isEligible?: boolean;
+  ineligibilityReasons?: string[];
+}
+
+const ScholarshipCard = ({ 
+  scholarship, 
+  onToggleSave, 
+  onAddToTracker, 
+  onViewDetails,
+  isSaving, 
+  isAddingToTracker 
+}: {
+  scholarship: ExtendedScholarship;
   onToggleSave: (id: string, isSaved: boolean) => void;
   onAddToTracker: (id: string) => void;
+  onViewDetails: (scholarship: ExtendedScholarship) => void;
   isSaving: boolean;
   isAddingToTracker: boolean;
 }) => {
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-    if (score >= 80) return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-    if (score >= 70) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+    if (score >= 90) return "bg-gradient-to-r from-green-500 to-emerald-500 text-white";
+    if (score >= 80) return "bg-gradient-to-r from-blue-500 to-cyan-500 text-white";
+    if (score >= 70) return "bg-gradient-to-r from-yellow-500 to-orange-500 text-white";
     return "bg-muted text-muted-foreground";
   };
 
   const formatDeadline = (deadline: string | null) => {
-    if (!deadline) return 'No deadline';
+    if (!deadline) return 'Rolling';
     try {
       return format(new Date(deadline), 'MMM d, yyyy');
     } catch {
       return deadline;
+    }
+  };
+
+  const getDaysRemaining = (deadline: string | null) => {
+    if (!deadline) return null;
+    try {
+      const days = Math.ceil((new Date(deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      return days;
+    } catch {
+      return null;
     }
   };
 
@@ -67,71 +97,117 @@ const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, 
     return tags.slice(0, 3);
   };
 
+  const daysRemaining = getDaysRemaining(scholarship.deadline);
+  const isUrgent = daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0;
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2">
-              <CardTitle className="text-lg">{scholarship.title}</CardTitle>
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:border-primary/30 overflow-hidden">
+      {/* Urgency Banner */}
+      {isUrgent && (
+        <div className="bg-gradient-to-r from-red-500 to-orange-500 px-4 py-1.5 text-white text-sm font-medium flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          Only {daysRemaining} days left to apply!
+        </div>
+      )}
+      
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
               {scholarship.isSaved && (
-                <BookmarkIcon className="h-4 w-4 text-primary fill-current" />
+                <BookmarkIcon className="h-4 w-4 text-primary fill-current flex-shrink-0" />
               )}
+              <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                {scholarship.title}
+              </CardTitle>
             </div>
-            <CardDescription className="text-sm text-muted-foreground">
+            <CardDescription className="text-sm text-muted-foreground flex items-center gap-1">
+              <Globe className="h-3 w-3" />
               {scholarship.source_name || 'Scholarship Provider'}
             </CardDescription>
           </div>
-          <Badge className={`${getScoreColor(scholarship.matchScore)} border-0`}>
-            {scholarship.matchScore}% match
-          </Badge>
+          
+          {/* Match Score Badge */}
+          <div className="flex flex-col items-center">
+            <Badge className={`${getScoreColor(scholarship.matchScore)} border-0 px-3 py-1 text-sm font-bold`}>
+              {scholarship.matchScore}%
+            </Badge>
+            <span className="text-xs text-muted-foreground mt-1">match</span>
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {scholarship.description || 'No description available'}
+      
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {scholarship.description || 'No description available. Click to view details.'}
         </p>
         
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
           {getTags(scholarship).map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
             </Badge>
           ))}
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
-          <div className="flex items-center space-x-1">
-            <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-            <span>{formatAmount(scholarship.amount)}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-            <span>{formatDeadline(scholarship.deadline)}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-            <span>{scholarship.location || 'Various'}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <GraduationCapIcon className="h-3 w-3 text-muted-foreground" />
-            <span>{scholarship.category || 'General'}</span>
-          </div>
-        </div>
-        
-        <div className="flex space-x-2">
-          {scholarship.link ? (
-            <a href={scholarship.link} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button className="w-full">
-                Apply Now
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
-            </a>
-          ) : (
-            <Button className="flex-1" disabled>
-              No Link Available
-            </Button>
+          {!scholarship.isEligible && (
+            <Badge variant="outline" className="text-xs bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border-amber-200">
+              May not qualify
+            </Badge>
           )}
+        </div>
+        
+        {/* Key Info Grid */}
+        <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-muted/50">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-green-100 dark:bg-green-900/30">
+              <DollarSignIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Award</p>
+              <p className="text-sm font-semibold">{formatAmount(scholarship.amount)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-md ${isUrgent ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+              <CalendarIcon className={`h-3.5 w-3.5 ${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Deadline</p>
+              <p className={`text-sm font-semibold ${isUrgent ? 'text-red-600 dark:text-red-400' : ''}`}>
+                {formatDeadline(scholarship.deadline)}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-purple-100 dark:bg-purple-900/30">
+              <MapPinIcon className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Location</p>
+              <p className="text-sm font-semibold">{scholarship.location || 'Global'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30">
+              <GraduationCapIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Category</p>
+              <p className="text-sm font-semibold">{scholarship.category || 'General'}</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-2">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => onViewDetails(scholarship)}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            View Details
+          </Button>
           <Button 
             variant="outline" 
             size="icon"
@@ -144,18 +220,19 @@ const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, 
               <BookmarkIcon className={`h-4 w-4 ${scholarship.isSaved ? 'fill-current text-primary' : ''}`} />
             )}
           </Button>
-          {!scholarship.isApplied && (
+          {!scholarship.isApplied ? (
             <Button 
-              variant="outline"
               onClick={() => onAddToTracker(scholarship.id)}
               disabled={isAddingToTracker}
+              className="flex-1 bg-gradient-to-r from-primary to-primary/80"
             >
-              {isAddingToTracker ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add to Tracker'}
+              {isAddingToTracker ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <TrendingUp className="mr-2 h-4 w-4" />}
+              Track
             </Button>
-          )}
-          {scholarship.isApplied && (
-            <Badge variant="outline" className="flex items-center px-3">
-              In Tracker
+          ) : (
+            <Badge variant="outline" className="flex items-center px-3 py-2">
+              <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" />
+              Tracked
             </Badge>
           )}
         </div>
@@ -167,6 +244,8 @@ const ScholarshipCard = ({ scholarship, onToggleSave, onAddToTracker, isSaving, 
 const Scholarships = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showEligibleOnly, setShowEligibleOnly] = useState(false);
+  const [selectedScholarship, setSelectedScholarship] = useState<ExtendedScholarship | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const { user } = useAuth();
   const { data: scholarships, isLoading } = useScholarships(searchQuery);
   const { data: savedScholarships, isLoading: savedLoading } = useSavedScholarships();
@@ -183,6 +262,11 @@ const Scholarships = () => {
   const handleAddToTracker = (scholarshipId: string) => {
     if (!user) return;
     addApplication.mutate({ scholarshipId });
+  };
+
+  const handleViewDetails = (scholarship: ExtendedScholarship) => {
+    setSelectedScholarship(scholarship);
+    setDetailModalOpen(true);
   };
 
   // Calculate eligibility for all scholarships
@@ -312,6 +396,7 @@ const Scholarships = () => {
                       scholarship={scholarship}
                       onToggleSave={handleToggleSave}
                       onAddToTracker={handleAddToTracker}
+                      onViewDetails={handleViewDetails}
                       isSaving={toggleSave.isPending}
                       isAddingToTracker={addApplication.isPending}
                     />
@@ -351,9 +436,10 @@ const Scholarships = () => {
               savedScholarships.map((scholarship) => (
                 <ScholarshipCard
                   key={scholarship.id}
-                  scholarship={scholarship}
+                  scholarship={scholarship as ExtendedScholarship}
                   onToggleSave={handleToggleSave}
                   onAddToTracker={handleAddToTracker}
+                  onViewDetails={handleViewDetails}
                   isSaving={toggleSave.isPending}
                   isAddingToTracker={addApplication.isPending}
                 />
@@ -457,11 +543,12 @@ const Scholarships = () => {
                   Scholarships with deadlines in the next 30 days:
                 </p>
                 {upcomingDeadlines.map((scholarship) => (
-                  <ScholarshipCard
+                    <ScholarshipCard
                     key={scholarship.id}
                     scholarship={scholarship}
                     onToggleSave={handleToggleSave}
                     onAddToTracker={handleAddToTracker}
+                    onViewDetails={handleViewDetails}
                     isSaving={toggleSave.isPending}
                     isAddingToTracker={addApplication.isPending}
                   />
@@ -479,6 +566,16 @@ const Scholarships = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <ScholarshipDetailModal
+        scholarship={selectedScholarship}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        onSave={handleToggleSave}
+        onAddToTracker={handleAddToTracker}
+        isSaving={toggleSave.isPending}
+        isAddingToTracker={addApplication.isPending}
+      />
     </div>
   );
 };
