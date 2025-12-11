@@ -29,10 +29,10 @@ export const useAvatarUpload = () => {
     setUploading(true);
 
     try {
-      // Generate unique filename
+      // Generate unique filename - path format: avatars/{user_id}-{timestamp}.{ext}
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const filePath = fileName; // Store directly in avatars bucket root
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
