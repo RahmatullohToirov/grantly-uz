@@ -13,6 +13,9 @@ import {
   useAIRecommendations 
 } from "@/hooks/useDashboardData";
 import { useToggleSaveScholarship } from "@/hooks/useScholarships";
+import { useProfileCompleteness } from "@/hooks/useProfileCompleteness";
+import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
+import { DeadlineCalendar } from "@/components/DeadlineCalendar";
 import { 
   BookmarkIcon, 
   ClockIcon, 
@@ -34,6 +37,7 @@ const Dashboard = () => {
   const { data: trackedScholarships, isLoading: trackedLoading } = useTrackedScholarships();
   const { data: recommendations, isLoading: recommendationsLoading } = useAIRecommendations();
   const toggleSave = useToggleSaveScholarship();
+  const completeness = useProfileCompleteness();
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
@@ -87,6 +91,13 @@ const Dashboard = () => {
             Track your scholarship journey and discover new opportunities
           </p>
         </div>
+
+        {/* Profile Completion Banner */}
+        {!completeness.isComplete && (
+          <div className="mb-8">
+            <ProfileCompletionBanner variant="full" />
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -257,9 +268,9 @@ const Dashboard = () => {
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span>Profile Completion</span>
-                    <span>85%</span>
+                    <span>{completeness.percentage}%</span>
                   </div>
-                  <Progress value={85} className="h-2" />
+                  <Progress value={completeness.percentage} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -267,6 +278,8 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Deadline Calendar */}
+            <DeadlineCalendar />
             {/* AI Recommendations */}
             <Card>
               <CardHeader>
