@@ -24,6 +24,17 @@ export interface Profile {
   field_of_study: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // Enhanced profile fields
+  gender: string | null;
+  date_of_birth: string | null;
+  nationality: string | null;
+  country_of_residence: string | null;
+  gpa: number | null;
+  institution_type: string | null;
+  income_level: string | null;
+  financial_need: boolean | null;
+  email_verified: boolean | null;
+  profile_completed_at: string | null;
 }
 
 export const useProfile = () => {
@@ -56,20 +67,13 @@ export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (profileData: ProfileFormData) => {
+    mutationFn: async (profileData: Partial<Profile>) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
-      // Validate the data
-      const validatedData = profileSchema.parse(profileData);
       
       const { data, error } = await supabase
         .from('profiles')
         .update({
-          full_name: validatedData.full_name,
-          bio: validatedData.bio || null,
-          location: validatedData.location || null,
-          education_level: validatedData.education_level || null,
-          field_of_study: validatedData.field_of_study || null,
+          ...profileData,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
@@ -81,16 +85,12 @@ export const useUpdateProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-profile'] });
       toast.success('Profile updated successfully');
     },
     onError: (error) => {
       console.error('Error updating profile:', error);
-      if (error instanceof z.ZodError) {
-        const firstError = error.errors[0];
-        toast.error(firstError.message);
-      } else {
-        toast.error('Failed to update profile');
-      }
+      toast.error('Failed to update profile');
     },
   });
 };

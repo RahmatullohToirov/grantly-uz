@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_checklists: {
+        Row: {
+          checklist_items: Json
+          created_at: string
+          id: string
+          scholarship_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checklist_items?: Json
+          created_at?: string
+          id?: string
+          scholarship_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checklist_items?: Json
+          created_at?: string
+          id?: string
+          scholarship_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_checklists_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_checklists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_comments: {
         Row: {
           author_id: string
@@ -283,34 +325,64 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          country_of_residence: string | null
           created_at: string | null
+          date_of_birth: string | null
           education_level: string | null
+          email_verified: boolean | null
           field_of_study: string | null
+          financial_need: boolean | null
           full_name: string | null
+          gender: string | null
+          gpa: number | null
           id: string
+          income_level: string | null
+          institution_type: string | null
           location: string | null
+          nationality: string | null
+          profile_completed_at: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          country_of_residence?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           education_level?: string | null
+          email_verified?: boolean | null
           field_of_study?: string | null
+          financial_need?: boolean | null
           full_name?: string | null
+          gender?: string | null
+          gpa?: number | null
           id: string
+          income_level?: string | null
+          institution_type?: string | null
           location?: string | null
+          nationality?: string | null
+          profile_completed_at?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          country_of_residence?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           education_level?: string | null
+          email_verified?: boolean | null
           field_of_study?: string | null
+          financial_need?: boolean | null
           full_name?: string | null
+          gender?: string | null
+          gpa?: number | null
           id?: string
+          income_level?: string | null
+          institution_type?: string | null
           location?: string | null
+          nationality?: string | null
+          profile_completed_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -355,10 +427,19 @@ export type Database = {
           created_at: string | null
           deadline: string | null
           description: string | null
+          eligible_countries: string[] | null
+          eligible_education_levels: string[] | null
+          eligible_fields: string[] | null
+          eligible_genders: string[] | null
+          eligible_nationalities: string[] | null
+          financial_need_required: boolean | null
           id: string
           last_updated: string | null
           link: string | null
           location: string | null
+          max_age: number | null
+          min_age: number | null
+          min_gpa: number | null
           requirements: string | null
           source_name: string | null
           source_url: string | null
@@ -371,10 +452,19 @@ export type Database = {
           created_at?: string | null
           deadline?: string | null
           description?: string | null
+          eligible_countries?: string[] | null
+          eligible_education_levels?: string[] | null
+          eligible_fields?: string[] | null
+          eligible_genders?: string[] | null
+          eligible_nationalities?: string[] | null
+          financial_need_required?: boolean | null
           id?: string
           last_updated?: string | null
           link?: string | null
           location?: string | null
+          max_age?: number | null
+          min_age?: number | null
+          min_gpa?: number | null
           requirements?: string | null
           source_name?: string | null
           source_url?: string | null
@@ -387,10 +477,19 @@ export type Database = {
           created_at?: string | null
           deadline?: string | null
           description?: string | null
+          eligible_countries?: string[] | null
+          eligible_education_levels?: string[] | null
+          eligible_fields?: string[] | null
+          eligible_genders?: string[] | null
+          eligible_nationalities?: string[] | null
+          financial_need_required?: boolean | null
           id?: string
           last_updated?: string | null
           link?: string | null
           location?: string | null
+          max_age?: number | null
+          min_age?: number | null
+          min_gpa?: number | null
           requirements?: string | null
           source_name?: string | null
           source_url?: string | null
