@@ -5,16 +5,96 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation constants
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_LENGTH = 10000;
+const VALID_ROLES = ["user", "assistant", "system"];
+const VALID_TYPES = ["application-adviser", "essay-analyzer", "essay-builder"];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, type } = await req.json();
+    const body = await req.json();
+    const { messages, type } = body;
+
+    // Validate messages array
+    if (!Array.isArray(messages)) {
+      console.error("Invalid messages format: not an array");
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format: messages must be an array" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (messages.length === 0) {
+      console.error("Empty messages array");
+      return new Response(
+        JSON.stringify({ error: "Messages array cannot be empty" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (messages.length > MAX_MESSAGES) {
+      console.error(`Too many messages: ${messages.length} > ${MAX_MESSAGES}`);
+      return new Response(
+        JSON.stringify({ error: `Too many messages. Maximum allowed: ${MAX_MESSAGES}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate each message
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      
+      if (!msg || typeof msg !== "object") {
+        console.error(`Invalid message at index ${i}: not an object`);
+        return new Response(
+          JSON.stringify({ error: `Invalid message format at index ${i}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!msg.role || !VALID_ROLES.includes(msg.role)) {
+        console.error(`Invalid role at index ${i}: ${msg.role}`);
+        return new Response(
+          JSON.stringify({ error: `Invalid message role at index ${i}. Valid roles: ${VALID_ROLES.join(", ")}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (typeof msg.content !== "string") {
+        console.error(`Invalid content type at index ${i}: ${typeof msg.content}`);
+        return new Response(
+          JSON.stringify({ error: `Message content must be a string at index ${i}` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (msg.content.length > MAX_MESSAGE_LENGTH) {
+        console.error(`Message too long at index ${i}: ${msg.content.length} > ${MAX_MESSAGE_LENGTH}`);
+        return new Response(
+          JSON.stringify({ error: `Message at index ${i} exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Validate type if provided
+    if (type && !VALID_TYPES.includes(type)) {
+      console.error(`Invalid type: ${type}`);
+      return new Response(
+        JSON.stringify({ error: `Invalid type. Valid types: ${VALID_TYPES.join(", ")}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
@@ -50,6 +130,8 @@ Provide a score out of 100 and actionable recommendations.`;
 
 Be encouraging and help bring out the student's unique voice and experiences.`;
     }
+
+    console.log(`Processing AI chat request with type: ${type || 'default'}, messages: ${messages.length}`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
