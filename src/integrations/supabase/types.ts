@@ -200,6 +200,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mentorship_requests_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mentorship_requests_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -712,9 +719,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mentors_safe: {
+        Row: {
+          available: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          contact_info: string | null
+          created_at: string | null
+          expertise: string[] | null
+          id: string | null
+          name: string | null
+          title: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          contact_info?: never
+          created_at?: string | null
+          expertise?: string[] | null
+          id?: string | null
+          name?: string | null
+          title?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          contact_info?: never
+          created_at?: string | null
+          expertise?: string[] | null
+          id?: string | null
+          name?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      can_view_mentor_contact: {
+        Args: { mentor_uuid: string }
+        Returns: boolean
+      }
       generate_scholarship_hash: {
         Args: { link: string; title: string }
         Returns: string
