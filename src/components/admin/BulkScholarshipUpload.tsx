@@ -36,6 +36,38 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+// Extended schema for bulk upload validation (includes array fields)
+const bulkScholarshipSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required').max(500, 'Title must be less than 500 characters'),
+  description: z.string().max(5000, 'Description must be less than 5000 characters').optional().nullable(),
+  amount: z.number().positive('Amount must be positive').optional().nullable(),
+  deadline: z.string().optional().nullable(),
+  location: z.string().max(100, 'Location must be less than 100 characters').optional().nullable(),
+  category: z.string().max(50).optional().nullable(),
+  link: z.string().url('Please enter a valid URL').optional().nullable().or(z.literal('')),
+  requirements: z.string().max(2000, 'Requirements must be less than 2000 characters').optional().nullable(),
+  source_name: z.string().max(200, 'Source name must be less than 200 characters').optional().nullable(),
+  source_url: z.string().url('Please enter a valid URL').optional().nullable().or(z.literal('')),
+  eligible_genders: z.array(z.string()).optional().nullable(),
+  eligible_countries: z.array(z.string()).optional().nullable(),
+  eligible_nationalities: z.array(z.string()).optional().nullable(),
+  eligible_education_levels: z.array(z.string()).optional().nullable(),
+  eligible_fields: z.array(z.string()).optional().nullable(),
+  min_age: z.number().int().min(0).max(150).optional().nullable(),
+  max_age: z.number().int().min(0).max(150).optional().nullable(),
+  min_gpa: z.number().min(0).max(4).optional().nullable(),
+  financial_need_required: z.boolean().optional().nullable(),
+});
+
+type BulkScholarshipInput = z.infer<typeof bulkScholarshipSchema>;
+
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  data?: BulkScholarshipInput;
+}
 
 interface ScholarshipRow {
   title: string;
@@ -219,6 +251,38 @@ export const BulkScholarshipUpload = () => {
     }
   };
 
+  const validateRow = (row: ScholarshipRow): ValidationResult => {
+    try {
+      const data = bulkScholarshipSchema.parse({
+        title: row.title,
+        description: row.description || null,
+        amount: row.amount || null,
+        deadline: row.deadline || null,
+        location: row.location || null,
+        category: row.category || null,
+        link: row.link || null,
+        requirements: row.requirements || null,
+        source_name: row.source_name || null,
+        source_url: row.source_url || null,
+        eligible_genders: row.eligible_genders || null,
+        eligible_countries: row.eligible_countries || null,
+        eligible_nationalities: row.eligible_nationalities || null,
+        eligible_education_levels: row.eligible_education_levels || null,
+        eligible_fields: row.eligible_fields || null,
+        min_age: row.min_age || null,
+        max_age: row.max_age || null,
+        min_gpa: row.min_gpa || null,
+        financial_need_required: row.financial_need_required || null,
+      });
+      return { valid: true, errors: [], data };
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return { valid: false, errors: err.errors.map(e => `${e.path.join('.')}: ${e.message}`) };
+      }
+      return { valid: false, errors: ['Unknown validation error'] };
+    }
+  };
+
   const handleUpload = async () => {
     if (previewData.length === 0) return;
 
@@ -229,27 +293,40 @@ export const BulkScholarshipUpload = () => {
     for (let i = 0; i < previewData.length; i++) {
       const row = previewData[i];
       
+      // Validate row before inserting
+      const validation = validateRow(row);
+      if (!validation.valid) {
+        uploadResults.push({
+          success: false,
+          row: i + 1,
+          title: row.title,
+          error: `Validation failed: ${validation.errors.join('; ')}`
+        });
+        setProgress(((i + 1) / previewData.length) * 100);
+        continue;
+      }
+
       try {
         const { error } = await supabase.from('scholarships').insert({
-          title: row.title,
-          description: row.description || null,
-          amount: row.amount || null,
-          deadline: row.deadline || null,
-          location: row.location || null,
-          category: row.category || null,
-          link: row.link || null,
-          requirements: row.requirements || null,
-          source_name: row.source_name || null,
-          source_url: row.source_url || null,
-          eligible_genders: row.eligible_genders || null,
-          eligible_countries: row.eligible_countries || null,
-          eligible_nationalities: row.eligible_nationalities || null,
-          eligible_education_levels: row.eligible_education_levels || null,
-          eligible_fields: row.eligible_fields || null,
-          min_age: row.min_age || null,
-          max_age: row.max_age || null,
-          min_gpa: row.min_gpa || null,
-          financial_need_required: row.financial_need_required || false,
+          title: validation.data!.title,
+          description: validation.data!.description,
+          amount: validation.data!.amount,
+          deadline: validation.data!.deadline,
+          location: validation.data!.location,
+          category: validation.data!.category,
+          link: validation.data!.link || null,
+          requirements: validation.data!.requirements,
+          source_name: validation.data!.source_name,
+          source_url: validation.data!.source_url || null,
+          eligible_genders: validation.data!.eligible_genders,
+          eligible_countries: validation.data!.eligible_countries,
+          eligible_nationalities: validation.data!.eligible_nationalities,
+          eligible_education_levels: validation.data!.eligible_education_levels,
+          eligible_fields: validation.data!.eligible_fields,
+          min_age: validation.data!.min_age,
+          max_age: validation.data!.max_age,
+          min_gpa: validation.data!.min_gpa,
+          financial_need_required: validation.data!.financial_need_required ?? false,
         });
 
         if (error) throw error;
