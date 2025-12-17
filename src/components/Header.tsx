@@ -130,20 +130,6 @@ const Header = () => {
               {t('pricing')}
             </a>
             <a 
-              href="/resources" 
-              className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('resources')}
-            </a>
-            <a 
-              href="/community" 
-              className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('community')}
-            </a>
-            <a 
               href="/contact" 
               className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(false)}
@@ -158,7 +144,6 @@ const Header = () => {
                   variant="outline" 
                   size="lg"
                   className="w-full"
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('signIn')}
                 </Button>
@@ -167,7 +152,6 @@ const Header = () => {
                 <Button 
                   size="lg"
                   className="w-full bg-gradient-primary text-primary-foreground"
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {t('getStartedFree')}
                 </Button>

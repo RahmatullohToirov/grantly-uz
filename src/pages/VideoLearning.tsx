@@ -204,6 +204,13 @@ const VideoLearning = () => {
         <section className="py-16 bg-gradient-primary rounded-3xl relative overflow-hidden mb-12">
           <div className="absolute inset-0 bg-secondary/10"></div>
           <div className="text-center relative z-10 px-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-primary-foreground text-sm font-medium mb-4 animate-pulse">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+              </span>
+              Coming soon...
+            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-foreground mb-6 animate-fade-in">
               Learning Hub
             </h1>

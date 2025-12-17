@@ -155,7 +155,14 @@ const MentorMatching = () => {
       <main className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Mentor Matching</h1>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 animate-pulse">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            Coming soon...
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Expert Connect</h1>
           <p className="text-muted-foreground">
             Connect with successful scholars and experts who can guide your scholarship journey
           </p>

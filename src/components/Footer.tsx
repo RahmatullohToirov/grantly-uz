@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Linkedin, Mail, MapPin, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
@@ -7,14 +7,14 @@ const Footer = () => {
   return (
     <footer className="bg-foreground text-background py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-12">
           {/* Brand */}
           <div className="space-y-4 md:space-y-6">
             <div className="flex items-center space-x-2">
               <img 
                 src="/lovable-uploads/5fe2fbcf-488e-4b74-85a8-76d8b3071f79.png" 
                 alt="Grantly Logo" 
-                className="h-16 sm:h-20 md:h-24 w-auto brightness-0 invert"
+                className="h-24 sm:h-28 md:h-32 w-auto brightness-0 invert"
               />
             </div>
             <p className="text-background/80 leading-relaxed text-sm md:text-base">
@@ -39,27 +39,8 @@ const Footer = () => {
               <a href="/pricing" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
                 {t('pricing')}
               </a>
-              <a href="/community" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
-                {t('community')}
-              </a>
-            </div>
-          </div>
-
-          {/* Support */}
-          <div className="space-y-4 md:space-y-6">
-            <h3 className="text-base md:text-lg font-semibold text-background">{t('resources')}</h3>
-            <div className="space-y-2 md:space-y-3">
-              <a href="/resources" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
-                {t('resources')}
-              </a>
-              <a href="/scholarships" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
-                {t('scholarships')}
-              </a>
-              <a href="/video-learning" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
-                {t('learningHub')}
-              </a>
-              <a href="/mentor-matching" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
-                {t('expertConnect')}
+              <a href="/contact" className="block text-sm md:text-base text-background/80 hover:text-secondary transition-colors">
+                {t('contact')}
               </a>
             </div>
           </div>
@@ -70,11 +51,7 @@ const Footer = () => {
             <div className="space-y-3 md:space-y-4">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 md:w-5 md:h-5 text-secondary flex-shrink-0" />
-                <span className="text-background/80 text-sm md:text-base">hello@grantly.com</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 md:w-5 md:h-5 text-secondary flex-shrink-0" />
-                <span className="text-background/80 text-sm md:text-base">1-800-GRANTLY</span>
+                <span className="text-background/80 text-sm md:text-base">info@grantly.uz</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 md:w-5 md:h-5 text-secondary flex-shrink-0" />
@@ -102,16 +79,13 @@ const Footer = () => {
 
             {/* Social links */}
             <div className="flex items-center space-x-3 md:space-x-4">
-              <a href="#" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
-                <Facebook className="w-4 h-4 md:w-5 md:h-5" />
+              <a href="https://t.me/grantly_uz" target="_blank" rel="noopener noreferrer" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
+                <Send className="w-4 h-4 md:w-5 md:h-5" />
               </a>
-              <a href="#" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
-                <Twitter className="w-4 h-4 md:w-5 md:h-5" />
-              </a>
-              <a href="#" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
+              <a href="https://www.instagram.com/grantly_uz/" target="_blank" rel="noopener noreferrer" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
                 <Instagram className="w-4 h-4 md:w-5 md:h-5" />
               </a>
-              <a href="#" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
+              <a href="https://www.linkedin.com/company/grantly-uz/" target="_blank" rel="noopener noreferrer" className="w-9 h-9 md:w-10 md:h-10 bg-background/10 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors">
                 <Linkedin className="w-4 h-4 md:w-5 md:h-5" />
               </a>
             </div>

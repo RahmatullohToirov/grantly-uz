@@ -316,9 +316,18 @@ const Resources = () => {
           </div>
         </section>
 
-        {/* Categories Filter */}
+        {/* Coming Soon Banner */}
         <section className="py-8 bg-muted/20 border-y border-border">
           <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium animate-pulse">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                More resources coming soon...
+              </div>
+            </div>
             <div className="flex flex-wrap gap-3 justify-center">
               {categories.map((category, index) => (
                 <Button

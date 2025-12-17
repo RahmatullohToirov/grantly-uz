@@ -34,6 +34,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import PreApplyModal from './PreApplyModal';
 // Extended Scholarship type for the modal
 interface Scholarship {
   id: string;
@@ -83,6 +84,8 @@ export const ScholarshipDetailModal = ({
   isSaving,
   isAddingToTracker,
 }: ScholarshipDetailModalProps) => {
+  const [preApplyModalOpen, setPreApplyModalOpen] = useState(false);
+  
   if (!scholarship) return null;
 
   const formatAmount = (amount: number | null) => {
@@ -549,12 +552,13 @@ export const ScholarshipDetailModal = ({
                 </Button>
               )}
               {scholarship.link ? (
-                <a href={scholarship.link} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-initial">
-                  <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
-                    Apply Now
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Button>
-                </a>
+                <Button 
+                  className="flex-1 sm:flex-initial bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  onClick={() => setPreApplyModalOpen(true)}
+                >
+                  Apply Now
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
               ) : (
                 <Button disabled className="flex-1 sm:flex-initial">
                   No Application Link
@@ -564,6 +568,16 @@ export const ScholarshipDetailModal = ({
           </div>
         </div>
       </DialogContent>
+      
+      <PreApplyModal
+        open={preApplyModalOpen}
+        onOpenChange={setPreApplyModalOpen}
+        scholarshipTitle={scholarship.title}
+        scholarshipLink={scholarship.link}
+        matchScore={scholarship.matchScore}
+        strengths={matchResult?.matchDetails?.filter(d => d.score > 0).map(d => `Strong ${d.category.toLowerCase()} match`) || []}
+        weaknesses={matchResult?.ineligibilityReasons || []}
+      />
     </Dialog>
   );
 };
