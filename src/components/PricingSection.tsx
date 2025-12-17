@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Sparkles } from "lucide-react";
+import SignUpModal from "@/components/auth/SignUpModal";
 
 const plans = [
   {
@@ -14,7 +15,8 @@ const plans = [
       "Mobile app access"
     ],
     cta: "Get Started Free",
-    popular: false
+    popular: false,
+    earlyAccess: false
   },
   {
     name: "Pro",
@@ -31,8 +33,9 @@ const plans = [
       "Deadline reminders",
       "Advanced search filters"
     ],
-    cta: "Start Pro Trial",
-    popular: true
+    cta: "Join Early Access (Free)",
+    popular: true,
+    earlyAccess: true
   },
   {
     name: "Premium",
@@ -49,8 +52,9 @@ const plans = [
       "Priority phone support",
       "White-glove application assistance"
     ],
-    cta: "Go Premium",
-    popular: false
+    cta: "Unlock Premium – Early Access",
+    popular: false,
+    earlyAccess: true
   }
 ];
 
@@ -58,7 +62,7 @@ const PricingSection = () => {
   return (
     <section id="pricing" className="py-24 bg-muted/30">
       <div className="container mx-auto px-6">
-        <div className="text-center space-y-4 mb-16 animate-fade-in">
+        <div className="text-center space-y-4 mb-8 animate-fade-in">
           <h2 className="text-4xl lg:text-5xl font-bold">
             Choose Your 
             <span className="bg-gradient-primary bg-clip-text text-transparent"> Success Plan</span>
@@ -67,6 +71,20 @@ const PricingSection = () => {
             Start free and upgrade as you grow. All plans include our core AI matching technology 
             and are designed with students' budgets in mind.
           </p>
+        </div>
+
+        {/* Early Access Banner */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border border-primary/20 rounded-2xl p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-foreground">Early Access</span>
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-muted-foreground text-sm">
+              All plans are free for a limited time while we improve the platform.
+            </p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -93,10 +111,26 @@ const PricingSection = () => {
               {/* Header */}
               <div className="text-center space-y-4 mb-8">
                 <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
+                
+                {/* Early Access Badge for paid plans */}
+                {plan.earlyAccess && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium">
+                    <Sparkles className="w-3 h-3" />
+                    Unlocked for Early Users
+                  </div>
+                )}
+                
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-center space-x-1">
-                    <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                    {plan.period && (
+                    {plan.earlyAccess ? (
+                      <>
+                        <span className="text-2xl font-bold text-muted-foreground/50 line-through">{plan.price}</span>
+                        <span className="text-4xl font-bold text-primary ml-2">Free</span>
+                      </>
+                    ) : (
+                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                    )}
+                    {plan.period && !plan.earlyAccess && (
                       <span className="text-muted-foreground">{plan.period}</span>
                     )}
                   </div>
@@ -117,25 +151,30 @@ const PricingSection = () => {
               </div>
 
               {/* CTA */}
-              <Button 
-                variant={plan.popular ? "hero" : "outline"} 
-                size="lg" 
-                className="w-full"
-              >
-                {plan.cta}
-              </Button>
+              <SignUpModal>
+                <Button 
+                  variant={plan.popular ? "hero" : "outline"} 
+                  size="lg" 
+                  className="w-full"
+                >
+                  {plan.cta}
+                </Button>
+              </SignUpModal>
             </div>
           ))}
         </div>
 
-        {/* Money back guarantee */}
-        <div className="text-center mt-12 animate-fade-in">
+        {/* Early Access Disclaimer */}
+        <div className="text-center mt-12 animate-fade-in space-y-4">
           <div className="inline-flex items-center space-x-2 bg-background/80 backdrop-blur-sm rounded-full px-6 py-3 border border-border/50 shadow-soft">
             <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
               <Check className="w-4 h-4 text-white" />
             </div>
-            <span className="text-muted-foreground font-medium">30-day money-back guarantee on all paid plans</span>
+            <span className="text-muted-foreground font-medium">No credit card required during early access</span>
           </div>
+          <p className="text-sm text-muted-foreground/70 max-w-md mx-auto">
+            Early access users may receive special benefits or discounts when paid plans launch.
+          </p>
         </div>
       </div>
     </section>

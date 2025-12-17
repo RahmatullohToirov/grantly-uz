@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Sparkles } from "lucide-react";
 import SignUpModal from "@/components/auth/SignUpModal";
 
 const plans = [
@@ -18,7 +18,8 @@ const plans = [
       "Mobile app access"
     ],
     cta: "Get Started Free",
-    popular: false
+    popular: false,
+    earlyAccess: false
   },
   {
     name: "Pro",
@@ -35,8 +36,9 @@ const plans = [
       "Deadline reminders",
       "Advanced search filters"
     ],
-    cta: "Start Pro Trial",
-    popular: true
+    cta: "Join Early Access (Free)",
+    popular: true,
+    earlyAccess: true
   },
   {
     name: "Premium",
@@ -53,8 +55,9 @@ const plans = [
       "Priority phone support",
       "White-glove application assistance"
     ],
-    cta: "Go Premium",
-    popular: false
+    cta: "Unlock Premium – Early Access",
+    popular: false,
+    earlyAccess: true
   }
 ];
 
@@ -80,6 +83,20 @@ const Pricing = () => {
         {/* Pricing Plans */}
         <section className="py-24 bg-background">
           <div className="container mx-auto px-6">
+            {/* Early Access Banner */}
+            <div className="max-w-3xl mx-auto mb-12">
+              <div className="bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border border-primary/20 rounded-2xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-foreground">Early Access</span>
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  All plans are free for a limited time while we improve the platform.
+                </p>
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {plans.map((plan, index) => (
                 <div
@@ -104,10 +121,26 @@ const Pricing = () => {
                   {/* Header */}
                   <div className="text-center space-y-4 mb-8">
                     <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
+                    
+                    {/* Early Access Badge for paid plans */}
+                    {plan.earlyAccess && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium">
+                        <Sparkles className="w-3 h-3" />
+                        Unlocked for Early Users
+                      </div>
+                    )}
+                    
                     <div className="space-y-2">
                       <div className="flex items-baseline justify-center space-x-1">
-                        <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                        {plan.period && (
+                        {plan.earlyAccess ? (
+                          <>
+                            <span className="text-2xl font-bold text-muted-foreground/50 line-through">{plan.price}</span>
+                            <span className="text-4xl font-bold text-primary ml-2">Free</span>
+                          </>
+                        ) : (
+                          <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                        )}
+                        {plan.period && !plan.earlyAccess && (
                           <span className="text-muted-foreground">{plan.period}</span>
                         )}
                       </div>
@@ -128,39 +161,30 @@ const Pricing = () => {
                   </div>
 
                   {/* CTA */}
-                  {plan.name === "Basic" ? (
-                    <SignUpModal>
-                      <Button 
-                        variant={plan.popular ? "hero" : "outline"} 
-                        size="lg" 
-                        className="w-full"
-                      >
-                        {plan.cta}
-                      </Button>
-                    </SignUpModal>
-                  ) : (
-                    <SignUpModal>
-                      <Button 
-                        variant={plan.popular ? "hero" : "outline"} 
-                        size="lg" 
-                        className="w-full"
-                      >
-                        {plan.cta}
-                      </Button>
-                    </SignUpModal>
-                  )}
+                  <SignUpModal>
+                    <Button 
+                      variant={plan.popular ? "hero" : "outline"} 
+                      size="lg" 
+                      className="w-full"
+                    >
+                      {plan.cta}
+                    </Button>
+                  </SignUpModal>
                 </div>
               ))}
             </div>
 
-            {/* Money back guarantee */}
-            <div className="text-center mt-12 animate-fade-in">
+            {/* Early Access Disclaimer */}
+            <div className="text-center mt-12 animate-fade-in space-y-4">
               <div className="inline-flex items-center space-x-2 bg-background/80 backdrop-blur-sm rounded-full px-6 py-3 border border-border/50 shadow-soft">
                 <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-muted-foreground font-medium">30-day money-back guarantee on all paid plans</span>
+                <span className="text-muted-foreground font-medium">No credit card required during early access</span>
               </div>
+              <p className="text-sm text-muted-foreground/70 max-w-md mx-auto">
+                Early access users may receive special benefits or discounts when paid plans launch.
+              </p>
             </div>
           </div>
         </section>
@@ -180,20 +204,20 @@ const Pricing = () => {
             <div className="max-w-4xl mx-auto space-y-8">
               {[
                 {
-                  question: "Can I change plans anytime?",
-                  answer: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate your billing accordingly."
+                  question: "Is early access really free?",
+                  answer: "Yes! During our early access period, all features including Pro and Premium tiers are completely free. No credit card required. We're focused on improving the platform with your feedback."
                 },
                 {
-                  question: "What happens if I cancel my subscription?",
-                  answer: "You can cancel anytime and continue using your paid features until the end of your billing period. Your account will then revert to the free Basic plan."
+                  question: "What happens when early access ends?",
+                  answer: "We'll notify you well in advance before transitioning to paid plans. Early access users may receive special discounts or benefits as a thank you for helping us improve."
+                },
+                {
+                  question: "Can I change plans anytime?",
+                  answer: "Yes! You can upgrade or downgrade your plan at any time. During early access, all features are available to everyone."
                 },
                 {
                   question: "Do you offer student discounts?",
-                  answer: "Yes! We offer a 50% student discount on all paid plans. Simply verify your student status with a valid .edu email address."
-                },
-                {
-                  question: "Is there a free trial for paid plans?",
-                  answer: "Yes! All paid plans come with a 14-day free trial. No credit card required to start your trial."
+                  answer: "Yes! When paid plans launch, we'll offer a 50% student discount on all tiers. Simply verify your student status with a valid .edu email address."
                 }
               ].map((faq, index) => (
                 <div key={index} className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border border-border shadow-elegant hover:shadow-soft transition-all duration-300 hover:scale-[1.02]">
@@ -219,7 +243,7 @@ const Pricing = () => {
               Ready to Start Your Success Journey?
             </h2>
             <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of students who are already using Grantly to find and win scholarships.
+              Join thousands of students who are already using Grantly to find and win scholarships — free during early access.
             </p>
             <SignUpModal>
               <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
