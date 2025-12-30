@@ -222,8 +222,18 @@ export const BulkScholarshipUpload = () => {
   const parseJSON = (text: string): ScholarshipRow[] => {
     try {
       const data = JSON.parse(text);
-      return Array.isArray(data) ? data.filter(row => row.title) : [];
-    } catch {
+      if (!Array.isArray(data)) {
+        toast.error('JSON must be an array of scholarship objects');
+        return [];
+      }
+      const validRows = data.filter(row => row && typeof row === 'object' && row.title);
+      if (validRows.length === 0 && data.length > 0) {
+        toast.error('No valid scholarships found. Each object must have a "title" field.');
+      }
+      return validRows;
+    } catch (err) {
+      console.error('JSON parse error:', err);
+      toast.error(`Invalid JSON format: ${err instanceof Error ? err.message : 'Unknown error'}`);
       return [];
     }
   };
