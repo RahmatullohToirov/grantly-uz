@@ -6,13 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import CreatePostForm from "@/components/community/CreatePostForm";
+import CommunityFeed from "@/components/community/CommunityFeed";
+import CommunityStats from "@/components/community/CommunityStats";
 import { 
   Users, 
   MessageCircle, 
   Calendar, 
   Award,
   BookOpen,
-  Heart,
   Globe,
   TrendingUp,
   Star,
@@ -28,8 +31,17 @@ import {
 
 const Community = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleJoinCommunity = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to join the Grantly community.",
+        variant: "default",
+      });
+      return;
+    }
     toast({
       title: "Welcome to Grantly Community!",
       description: "You've successfully joined our scholarship community. Start connecting with fellow scholars!",
@@ -37,6 +49,14 @@ const Community = () => {
   };
 
   const handleBookSession = (mentorName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to book a session.",
+        variant: "default",
+      });
+      return;
+    }
     toast({
       title: "Session Booking",
       description: `Booking a session with ${mentorName}. You'll receive a confirmation email shortly.`,
@@ -44,6 +64,14 @@ const Community = () => {
   };
 
   const handleJoinEvent = (eventTitle: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to join events.",
+        variant: "default",
+      });
+      return;
+    }
     toast({
       title: "Event Registration",
       description: `You've registered for "${eventTitle}". Calendar invite sent to your email.`,
@@ -51,18 +79,19 @@ const Community = () => {
   };
 
   const handleFollowUser = (userName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to follow users.",
+        variant: "default",
+      });
+      return;
+    }
     toast({
       title: "Following User",
       description: `You're now following ${userName}. You'll see their updates in your feed.`,
     });
   };
-
-  const communityStats = [
-    { icon: Users, number: "25,000+", label: "Active Scholars", color: "text-blue-600" },
-    { icon: Award, number: "4,200+", label: "Success Stories", color: "text-green-600" },
-    { icon: MessageCircle, number: "180,000+", label: "Discussions", color: "text-purple-600" },
-    { icon: Globe, number: "95+", label: "Countries", color: "text-orange-600" }
-  ];
 
   const successStories = [
     {
@@ -72,7 +101,6 @@ const Community = () => {
       university: "Cambridge University",
       country: "India",
       field: "Computer Science",
-      image: "/placeholder-aisha.jpg",
       quote: "The Grantly community was my support system. The mentorship and peer feedback on my essays made all the difference.",
       likes: 234,
       verified: true
@@ -84,7 +112,6 @@ const Community = () => {
       university: "MIT",
       country: "Mexico",
       field: "Engineering",
-      image: "/placeholder-carlos.jpg",
       quote: "Through Grantly's community events, I connected with alumni who guided me through the entire application process.",
       likes: 189,
       verified: true
@@ -96,7 +123,6 @@ const Community = () => {
       university: "Oxford University",
       country: "Morocco",
       field: "International Relations",
-      image: "/placeholder-fatima.jpg",
       quote: "The mock interview sessions with community mentors prepared me perfectly for the actual Rhodes interview.",
       likes: 312,
       verified: true
@@ -108,12 +134,10 @@ const Community = () => {
       name: "Dr. Elena Vasquez",
       title: "Former Rhodes Scholar",
       expertise: ["STEM Scholarships", "Research Proposals"],
-      university: "Harvard PhD",
       sessions: 280,
       rating: 4.9,
       responseTime: "2 hours",
       specialties: "Gates Cambridge, NSF, Fulbright",
-      image: "/placeholder-elena.jpg",
       verified: true,
       nextAvailable: "Tomorrow 2:00 PM"
     },
@@ -121,12 +145,10 @@ const Community = () => {
       name: "Prof. Michael Chen",
       title: "Fulbright Alumni & Professor",
       expertise: ["Essay Writing", "Interview Prep"],
-      university: "Stanford Professor",
       sessions: 350,
       rating: 4.8,
       responseTime: "1 hour",
       specialties: "Fulbright, Marshall, Churchill",
-      image: "/placeholder-michael.jpg",
       verified: true,
       nextAvailable: "Today 6:00 PM"
     },
@@ -134,12 +156,10 @@ const Community = () => {
       name: "Sarah Kim",
       title: "Gates Scholar Alumni",
       expertise: ["Personal Statements", "Leadership Essays"],
-      university: "Cambridge Graduate",
       sessions: 190,
       rating: 5.0,
       responseTime: "30 minutes",
       specialties: "Gates Cambridge, Commonwealth",
-      image: "/placeholder-sarah.jpg",
       verified: true,
       nextAvailable: "Tomorrow 10:00 AM"
     }
@@ -184,38 +204,6 @@ const Community = () => {
     }
   ];
 
-  const communityUpdates = [
-    {
-      user: "Maria Santos",
-      action: "won the Chevening Scholarship",
-      amount: "$50,000",
-      university: "London School of Economics",
-      timeAgo: "2 hours ago",
-      likes: 45,
-      comments: 12,
-      avatar: "/placeholder-maria.jpg"
-    },
-    {
-      user: "Ahmed Hassan",
-      action: "got accepted to Oxford Rhodes",
-      amount: "Full funding",
-      university: "Oxford University",
-      timeAgo: "5 hours ago", 
-      likes: 89,
-      comments: 23,
-      avatar: "/placeholder-ahmed.jpg"
-    },
-    {
-      user: "Dr. Jennifer Liu",
-      action: "shared new workshop",
-      content: "Interview Preparation Bootcamp",
-      timeAgo: "1 day ago",
-      likes: 156,
-      comments: 34,
-      avatar: "/placeholder-jennifer.jpg"
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
@@ -228,7 +216,7 @@ const Community = () => {
               Grantly Scholar Community
             </h1>
             <p className="text-lg sm:text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-fade-in">
-              Connect with 25,000+ successful scholars, expert mentors, and inspiring alumni who support each other's journey to academic excellence.
+              Connect with successful scholars, expert mentors, and inspiring alumni who support each other's journey to academic excellence.
             </p>
             
             {/* Search Bar */}
@@ -253,7 +241,12 @@ const Community = () => {
                 <UserPlus className="h-5 w-5 mr-2" />
                 Join Community
               </Button>
-              <Button size="lg" variant="secondary" className="hover-scale">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="hover-scale"
+                onClick={() => document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Start Discussion
               </Button>
@@ -261,86 +254,27 @@ const Community = () => {
           </div>
         </section>
 
-        {/* Community Stats */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {communityStats.map((stat, index) => (
-                <div key={index} className="text-center animate-fade-in hover-scale">
-                  <div className="bg-primary/10 rounded-2xl w-16 h-16 md:w-20 md:h-20 flex items-center justify-center mx-auto mb-4 transition-transform hover:scale-110">
-                    <stat.icon className={`h-8 w-8 md:h-10 md:w-10 ${stat.color}`} />
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="text-sm md:text-base text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Community Stats - Now with real data */}
+        <CommunityStats />
 
-        {/* Live Community Feed */}
-        <section className="py-16 bg-muted/30">
+        {/* Community Feed Section */}
+        <section id="community-feed" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4">
-                Live Community Updates
+                Community Feed
               </h2>
               <p className="text-lg text-muted-foreground">
-                Celebrate wins and stay connected with community achievements
+                Share your journey, ask questions, and connect with fellow scholars
               </p>
             </div>
 
             <div className="max-w-3xl mx-auto space-y-6">
-              {communityUpdates.map((update, index) => (
-                <Card key={index} className="bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant transition-all duration-300 hover:scale-[1.01] animate-fade-in">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarFallback className="text-lg bg-primary/10">
-                          {update.user.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="font-semibold text-card-foreground">{update.user}</span>
-                          <span className="text-muted-foreground">{update.action}</span>
-                          {update.amount && (
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              {update.amount}
-                            </Badge>
-                          )}
-                        </div>
-                        {update.university && (
-                          <p className="text-muted-foreground mb-3">{update.university}</p>
-                        )}
-                        {update.content && (
-                          <p className="text-card-foreground mb-3">{update.content}</p>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">{update.timeAgo}</span>
-                          <div className="flex items-center space-x-4">
-                            <Button variant="ghost" size="sm" className="hover-scale">
-                              <ThumbsUp className="h-4 w-4 mr-1" />
-                              {update.likes}
-                            </Button>
-                            <Button variant="ghost" size="sm" className="hover-scale">
-                              <MessageCircle className="h-4 w-4 mr-1" />
-                              {update.comments}
-                            </Button>
-                            <Button variant="ghost" size="sm" className="hover-scale">
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {/* Create Post Form */}
+              <CreatePostForm />
+              
+              {/* Posts Feed */}
+              <CommunityFeed />
             </div>
           </div>
         </section>
@@ -601,7 +535,12 @@ const Community = () => {
                 <UserPlus className="h-5 w-5 mr-2" />
                 Join the Community
               </Button>
-              <Button size="lg" variant="secondary" className="hover-scale">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="hover-scale"
+                onClick={() => document.getElementById('community-feed')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Start Networking
               </Button>
