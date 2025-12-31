@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import ChatBot from "@/components/ChatBot";
 import { 
@@ -17,6 +19,8 @@ import { useProfileCompleteness } from "@/hooks/useProfileCompleteness";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/ProfileCompletionBanner";
 import { DeadlineCalendar } from "@/components/DeadlineCalendar";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   BookmarkIcon, 
   ClockIcon, 
@@ -28,7 +32,9 @@ import {
   FileTextIcon,
   GraduationCapIcon,
   DollarSignIcon,
-  Loader2
+  Loader2,
+  Mail,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -40,12 +46,36 @@ const Dashboard = () => {
   const { data: recommendations, isLoading: recommendationsLoading } = useAIRecommendations();
   const toggleSave = useToggleSaveScholarship();
   const completeness = useProfileCompleteness();
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  const isEmailVerified = user?.email_confirmed_at !== null;
 
   // Get display name from profile or fallback to user metadata
   const displayName = profile?.full_name || 
     (user?.user_metadata?.first_name 
       ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim() 
       : 'Student');
+
+  const handleSendVerificationEmail = async () => {
+    if (!user?.email) return;
+    setSendingVerification(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
+      toast.success('Verification email sent! Check your inbox and spam folder.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send verification email');
+    } finally {
+      setSendingVerification(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
@@ -88,6 +118,52 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
+      
+      {/* Email Verification Banner */}
+      {!isEmailVerified && !bannerDismissed && (
+        <div className="bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-800">
+          <div className="container mx-auto px-6 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-full">
+                  <Mail className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    Please verify your email address
+                  </p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Verify your email to receive notifications and unlock all features
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                  onClick={handleSendVerificationEmail}
+                  disabled={sendingVerification}
+                >
+                  {sendingVerification ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Resend Email'
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 p-1 h-auto"
+                  onClick={() => setBannerDismissed(true)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <main className="container mx-auto px-6 py-8">
         {/* Welcome Header */}
