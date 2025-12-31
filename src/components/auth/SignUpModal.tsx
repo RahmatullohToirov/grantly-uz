@@ -85,12 +85,13 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: result.data.email,
         password: result.data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
+            full_name: `${result.data.firstName} ${result.data.lastName}`,
             first_name: result.data.firstName,
             last_name: result.data.lastName,
           }
@@ -98,15 +99,41 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
       });
 
       if (error) {
+        // Handle specific error cases
+        if (error.message.includes('already registered')) {
+          toast({
+            title: "Account exists",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error creating account",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+      } else if (data.user && !data.session) {
+        // User created but needs email confirmation
         toast({
-          title: "Error creating account",
-          description: error.message,
+          title: "Check your email!",
+          description: "We've sent you a confirmation link. Please check your inbox and spam folder.",
+        });
+        setOpen(false);
+        setFormData({ firstName: "", lastName: "", email: "", password: "" });
+        setAgreeToTerms(false);
+      } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+        // User already exists (Supabase returns user with empty identities for existing accounts)
+        toast({
+          title: "Account exists",
+          description: "An account with this email already exists. Please sign in instead.",
           variant: "destructive",
         });
-      } else {
+      } else if (data.session) {
+        // Auto-confirmed (email confirmation disabled)
         toast({
           title: "Account created!",
-          description: "Check your email to confirm your account.",
+          description: "Welcome to Grantly!",
         });
         setOpen(false);
         setFormData({ firstName: "", lastName: "", email: "", password: "" });

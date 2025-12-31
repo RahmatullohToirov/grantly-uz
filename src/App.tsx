@@ -20,6 +20,8 @@ import VideoLearning from "./pages/VideoLearning";
 import MentorMatching from "./pages/MentorMatching";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import AuthCallback from "./pages/AuthCallback";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +30,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
   
   if (!user) {
@@ -43,7 +45,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
   
   if (user) {
@@ -69,6 +71,10 @@ export default () => (
                 <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
                 <Route path="/pricing" element={<PublicRoute><Pricing /></PublicRoute>} />
                 <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
+                
+                {/* Auth routes - accessible without login */}
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
                 
                 {/* Protected routes */}
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
