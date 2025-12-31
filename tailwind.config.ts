@@ -129,6 +129,19 @@ export default {
 					'50%': {
 						transform: 'translateY(-10px)'
 					}
+				},
+				'snowfall': {
+					'0%': {
+						transform: 'translateY(-10vh) translateX(0)',
+						opacity: '1'
+					},
+					'50%': {
+						transform: 'translateY(50vh) translateX(20px)'
+					},
+					'100%': {
+						transform: 'translateY(110vh) translateX(-20px)',
+						opacity: '0.3'
+					}
 				}
 			},
 			animation: {
@@ -136,7 +149,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out',
 				'slide-up': 'slide-up 0.8s ease-out',
-				'float': 'float 3s ease-in-out infinite'
+				'float': 'float 3s ease-in-out infinite',
+				'snowfall': 'snowfall linear infinite'
 			}
 		}
 	},
