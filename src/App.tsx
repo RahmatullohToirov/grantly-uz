@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "sonner";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import SnowEffect from "@/components/SnowEffect";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Features from "./pages/Features";
@@ -62,6 +63,7 @@ export default () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <SnowEffect />
           <AuthProvider>
             <BrowserRouter>
               <Routes>
