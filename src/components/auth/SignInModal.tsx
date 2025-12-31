@@ -109,30 +109,36 @@ const SignInModal = ({ children }: SignInModalProps) => {
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    const emailValidation = z.string().email().safeParse(email);
+    if (!emailValidation.success) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address to reset your password.",
+        title: "Valid email required",
+        description: "Please enter a valid email address to reset your password.",
         variant: "destructive",
       });
       return;
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`
-    });
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`
+      });
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Password reset email sent",
-        description: "Check your email for password reset instructions.",
-      });
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password reset email sent!",
+          description: "Check your email for password reset instructions. Don't forget to check spam folder.",
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
