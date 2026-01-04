@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import OTPVerification from "./OTPVerification";
+import { useNavigate } from "react-router-dom";
 
 const signInSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255, "Email is too long"),
@@ -25,7 +26,10 @@ const SignInModal = ({ children }: SignInModalProps) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [pendingResetEmail, setPendingResetEmail] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +68,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
         setOpen(false);
         setEmail("");
         setPassword("");
+        navigate('/dashboard');
       }
     } catch (error) {
       toast({
@@ -121,9 +126,7 @@ const SignInModal = ({ children }: SignInModalProps) => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data, {
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data);
 
       if (error) {
         toast({
@@ -132,9 +135,12 @@ const SignInModal = ({ children }: SignInModalProps) => {
           variant: "destructive",
         });
       } else {
+        setPendingResetEmail(emailValidation.data);
+        setOpen(false);
+        setShowOTPModal(true);
         toast({
-          title: "Password reset email sent!",
-          description: "Check your email for password reset instructions. Don't forget to check spam folder.",
+          title: "Reset code sent!",
+          description: "Please check your email for the 6-digit code.",
         });
       }
     } finally {
@@ -142,103 +148,104 @@ const SignInModal = ({ children }: SignInModalProps) => {
     }
   };
 
+  const handleOTPSuccess = () => {
+    setShowOTPModal(false);
+    setPendingResetEmail("");
+    navigate('/auth/reset-password');
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Welcome Back
-          </DialogTitle>
-          <p className="text-muted-foreground">Sign in to your Grantly account</p>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
-                disabled={loading}
-              />
-            </div>
-            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-          </div>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Welcome Back
+            </DialogTitle>
+            <p className="text-muted-foreground">Sign in to your Grantly account</p>
+          </DialogHeader>
           
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
-                disabled={loading}
-              />
-              <button
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                  disabled={loading}
+                />
+              </div>
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  disabled={loading}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+            </div>
+            
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
+            
+            <div className="text-center">
+              <button 
+                onClick={handleForgotPassword}
+                className="text-sm text-primary hover:underline"
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                disabled={loading}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Forgot your password?
               </button>
             </div>
-            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-          </div>
+          </form>
           
-          <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
-          
-          <div className="text-center">
+          <p className="text-center text-sm text-muted-foreground">
+            Don't have an account?{" "}
             <button 
-              onClick={handleForgotPassword}
-              className="text-sm text-primary hover:underline"
-              type="button"
+              onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signup-trigger]') as HTMLElement)?.click(), 100);}}
+              className="text-primary hover:underline font-medium"
             >
-              Forgot your password?
+              Sign up for free
             </button>
-          </div>
-        </form>
-        
-        {/*
-        <div className="relative">
-          <Separator />
-          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-sm text-muted-foreground">
-            or
-          </span>
-        </div>
-        
-        <div className="space-y-2">
-          <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn}>
-            Continue with Google
-          </Button>
-        </div>
-        */}
-        
-        <p className="text-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
-          <button 
-            onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signup-trigger]') as HTMLElement)?.click(), 100);}}
-            className="text-primary hover:underline font-medium"
-          >
-            Sign up for free
-          </button>
-        </p>
-      </DialogContent>
-    </Dialog>
+          </p>
+        </DialogContent>
+      </Dialog>
+
+      <OTPVerification
+        email={pendingResetEmail}
+        type="recovery"
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onSuccess={handleOTPSuccess}
+      />
+    </>
   );
 };
 

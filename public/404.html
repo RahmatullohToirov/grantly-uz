@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grantly | Find. Apply. Achieve.</title>
-  <meta name="description"
-    content="Unlock your future with Grantly's AI-powered scholarship matching. Find personalized opportunities, get acceptance scores, and receive expert guidance to achieve your educational dreams.">
-  <meta name="author" content="Grantly" />
-  <meta name="keywords"
-    content="scholarships, AI matching, college funding, student aid, educational opportunities, scholarship search">
-
-  <meta property="og:title" content="Grantly - AI-Powered Scholarship Discovery" />
-  <meta property="og:description"
-    content="AI that finds scholarships and opportunities tailored just for you. Join thousands of students who've unlocked their future with Grantly." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image"
-    content="https://storage.googleapis.com/gpt-engineer-file-uploads/yIKQr22lXadoYQyXyjMSpBJ0t1t1/social-images/social-1757935334139-Screenshot (91).jpg">
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@lovable_dev" />
-  <meta name="twitter:image"
-    content="https://storage.googleapis.com/gpt-engineer-file-uploads/yIKQr22lXadoYQyXyjMSpBJ0t1t1/social-images/social-1757935334139-Screenshot (91).jpg">
-  <link rel="icon" type="image/x-icon"
-    href="https://storage.googleapis.com/gpt-engineer-file-uploads/yIKQr22lXadoYQyXyjMSpBJ0t1t1/uploads/1757935549517-logo header.png">
+  <meta name="description" content="Unlock your future with Grantly's AI-powered scholarship matching. Find personalized opportunities, get acceptance scores, and receive expert guidance to achieve your educational dreams.">
+  <script>
+    // GitHub Pages SPA redirect
+    // This script redirects 404s to the main app, which handles routing client-side
+    const path = window.location.pathname;
+    const search = window.location.search;
+    const hash = window.location.hash;
+    
+    // Preserve the path in sessionStorage for the main app to read
+    sessionStorage.setItem('spa-redirect', path + search + hash);
+    
+    // Redirect to the root
+    window.location.replace('/');
+  </script>
 </head>
-
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: system-ui, sans-serif;">
+    <div style="text-align: center;">
+      <h1>Redirecting...</h1>
+      <p>Please wait while we redirect you to the correct page.</p>
+    </div>
+  </div>
 </body>
-
 </html>
