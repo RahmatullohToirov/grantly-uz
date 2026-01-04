@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import OTPVerification from "./OTPVerification";
+import { useNavigate } from "react-router-dom";
 
 const signUpSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name is too long"),
@@ -44,7 +45,10 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<SignUpErrors>({});
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,7 +56,6 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (errors[name as keyof SignUpErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
@@ -89,7 +92,6 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
         email: result.data.email,
         password: result.data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: `${result.data.firstName} ${result.data.lastName}`,
             first_name: result.data.firstName,
@@ -99,10 +101,9 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
       });
 
       if (error) {
-        // Handle specific error cases
-        if (error.message.includes('already registered')) {
+        if (error.message.includes('already registered') || error.message.includes('User already registered')) {
           toast({
-            title: "Account exists",
+            title: "Account already exists",
             description: "An account with this email already exists. Please sign in instead.",
             variant: "destructive",
           });
@@ -113,21 +114,27 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
             variant: "destructive",
           });
         }
-      } else if (data.user && !data.session) {
-        // User created but needs email confirmation
+        return;
+      }
+
+      // Check if user already exists (Supabase returns user with empty identities)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
         toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link. Please check your inbox and spam folder.",
-        });
-        setOpen(false);
-        setFormData({ firstName: "", lastName: "", email: "", password: "" });
-        setAgreeToTerms(false);
-      } else if (data.user && data.user.identities && data.user.identities.length === 0) {
-        // User already exists (Supabase returns user with empty identities for existing accounts)
-        toast({
-          title: "Account exists",
+          title: "Account already exists",
           description: "An account with this email already exists. Please sign in instead.",
           variant: "destructive",
+        });
+        return;
+      }
+
+      if (data.user && !data.session) {
+        // User needs email confirmation - show OTP modal
+        setPendingEmail(result.data.email);
+        setOpen(false);
+        setShowOTPModal(true);
+        toast({
+          title: "Verification code sent!",
+          description: "Please check your email for the 6-digit code.",
         });
       } else if (data.session) {
         // Auto-confirmed (email confirmation disabled)
@@ -138,6 +145,7 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
         setOpen(false);
         setFormData({ firstName: "", lastName: "", email: "", password: "" });
         setAgreeToTerms(false);
+        navigate('/dashboard');
       }
     } catch (error) {
       toast({
@@ -148,6 +156,14 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOTPSuccess = () => {
+    setShowOTPModal(false);
+    setFormData({ firstName: "", lastName: "", email: "", password: "" });
+    setAgreeToTerms(false);
+    setPendingEmail("");
+    navigate('/dashboard');
   };
 
   const handleGoogleSignUp = async () => {
@@ -183,156 +199,151 @@ const SignUpModal = ({ children }: SignUpModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Create Your Account
-          </DialogTitle>
-          <p className="text-muted-foreground">Join thousands of students finding scholarships</p>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Create Your Account
+            </DialogTitle>
+            <p className="text-muted-foreground">Join thousands of students finding scholarships</p>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    placeholder="John"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className={`pl-10 ${errors.firstName ? "border-destructive" : ""}`}
+                    disabled={loading}
+                  />
+                </div>
+                {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className={`pl-10 ${errors.lastName ? "border-destructive" : ""}`}
+                    disabled={loading}
+                  />
+                </div>
+                {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
+              </div>
+            </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  placeholder="John"
-                  value={formData.firstName}
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  className={`pl-10 ${errors.firstName ? "border-destructive" : ""}`}
+                  className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                   disabled={loading}
                 />
               </div>
-              {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  placeholder="Doe"
-                  value={formData.lastName}
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a strong password"
+                  value={formData.password}
                   onChange={handleInputChange}
-                  className={`pl-10 ${errors.lastName ? "border-destructive" : ""}`}
+                  className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  disabled={loading}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
-              {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              <p className="text-xs text-muted-foreground">Min 8 characters with letters and numbers</p>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={agreeToTerms}
+                onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
                 disabled={loading}
               />
+              <Label htmlFor="terms" className="text-sm">
+                I agree to the{" "}
+                <a href="#" className="text-primary hover:underline">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a href="#" className="text-primary hover:underline">
+                  Privacy Policy
+                </a>
+              </Label>
             </div>
-            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Create a strong password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                disabled={loading}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-            <p className="text-xs text-muted-foreground">Min 8 characters with letters and numbers</p>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              checked={agreeToTerms}
-              onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
-              disabled={loading}
-            />
-            <Label htmlFor="terms" className="text-sm">
-              I agree to the{" "}
-              <a href="#" className="text-primary hover:underline">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-primary hover:underline">
-                Privacy Policy
-              </a>
-            </Label>
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            size="lg" 
-            disabled={!agreeToTerms || loading}
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </Button>
-        </form>
-        
-        {/*
-        <div className="relative">
-          <Separator />
-          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-sm text-muted-foreground">
-            or
-          </span>
-        </div>
-        
-        <div className="space-y-2">
-          <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignUp}>
-            Continue with Google
-          </Button>
-        </div>
-        */}
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              size="lg" 
+              disabled={!agreeToTerms || loading}
+            >
+              {loading ? "Creating account..." : "Create Account"}
+            </Button>
+          </form>
 
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <button 
-            onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signin-trigger]') as HTMLElement)?.click(), 100);}}
-            className="text-primary hover:underline font-medium"
-          >
-            Sign in here
-          </button>
-        </p>
-      </DialogContent>
-    </Dialog>
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <button 
+              onClick={() => {setOpen(false); setTimeout(() => (document.querySelector('[data-signin-trigger]') as HTMLElement)?.click(), 100);}}
+              className="text-primary hover:underline font-medium"
+            >
+              Sign in here
+            </button>
+          </p>
+        </DialogContent>
+      </Dialog>
+
+      <OTPVerification
+        email={pendingEmail}
+        type="signup"
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onSuccess={handleOTPSuccess}
+      />
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,21 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// SPA redirect handler for GitHub Pages 404
+const SPARedirectHandler = () => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('spa-redirect');
+    if (redirectPath) {
+      sessionStorage.removeItem('spa-redirect');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate]);
+  
+  return null;
+};
+
 export default () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -66,6 +82,7 @@ export default () => (
           <SnowEffect />
           <AuthProvider>
             <BrowserRouter>
+              <SPARedirectHandler />
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />

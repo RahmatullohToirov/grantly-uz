@@ -8,14 +8,11 @@ const AuthCallback = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Verifying your account...');
+  const [message, setMessage] = useState('Processing...');
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the token hash and type from URL
-        const token_hash = searchParams.get('token_hash');
-        const type = searchParams.get('type');
         const error = searchParams.get('error');
         const error_description = searchParams.get('error_description');
 
@@ -32,57 +29,25 @@ const AuthCallback = () => {
           return;
         }
 
-        // If we have a token_hash, verify it
-        if (token_hash && type) {
-          const { error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash,
-            type: type as 'signup' | 'recovery' | 'email',
-          });
-
-          if (verifyError) {
-            setStatus('error');
-            setMessage(verifyError.message);
-            toast({
-              title: 'Verification Failed',
-              description: verifyError.message,
-              variant: 'destructive',
-            });
-            setTimeout(() => navigate('/'), 3000);
-            return;
-          }
-
-          // Success handling based on type
-          if (type === 'signup' || type === 'email') {
-            setStatus('success');
-            setMessage('Email verified successfully! Redirecting to dashboard...');
-            toast({
-              title: 'Email Verified!',
-              description: 'Your account has been verified successfully.',
-            });
-            setTimeout(() => navigate('/dashboard'), 1500);
-          } else if (type === 'recovery') {
-            setStatus('success');
-            setMessage('Verified! Redirecting to reset password...');
-            setTimeout(() => navigate('/auth/reset-password'), 1000);
-          }
-          return;
-        }
-
         // Check for existing session (e.g., from OAuth callback)
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           setStatus('success');
           setMessage('Signed in successfully! Redirecting...');
+          toast({
+            title: 'Success!',
+            description: 'You have been signed in.',
+          });
           setTimeout(() => navigate('/dashboard'), 1000);
           return;
         }
 
-        // No token or session found
+        // No session found
         setStatus('error');
-        setMessage('Invalid or expired link. Please try again.');
+        setMessage('Session expired. Please sign in again.');
         toast({
-          title: 'Invalid Link',
-          description: 'The link is invalid or has expired.',
+          title: 'Session Expired',
+          description: 'Please sign in again.',
           variant: 'destructive',
         });
         setTimeout(() => navigate('/'), 3000);

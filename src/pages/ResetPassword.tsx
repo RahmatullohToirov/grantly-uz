@@ -32,20 +32,31 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
   const [isValidSession, setIsValidSession] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    // Check if user has a valid recovery session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsValidSession(true);
-      } else {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsValidSession(true);
+        } else {
+          toast({
+            title: 'Invalid Session',
+            description: 'Please request a new password reset code.',
+            variant: 'destructive',
+          });
+          setTimeout(() => navigate('/'), 2000);
+        }
+      } catch (error) {
         toast({
-          title: 'Invalid Session',
-          description: 'Please request a new password reset link.',
+          title: 'Error',
+          description: 'Could not verify session.',
           variant: 'destructive',
         });
         setTimeout(() => navigate('/'), 2000);
+      } finally {
+        setCheckingSession(false);
       }
     };
     checkSession();
@@ -97,12 +108,14 @@ const ResetPassword = () => {
     }
   };
 
-  if (!isValidSession) {
+  if (checkingSession || !isValidSession) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="text-muted-foreground">Verifying session...</p>
+          <p className="text-muted-foreground">
+            {checkingSession ? 'Verifying session...' : 'Redirecting...'}
+          </p>
         </div>
       </div>
     );
