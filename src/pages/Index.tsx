@@ -4,7 +4,6 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import MissionSection from "@/components/MissionSection";
 import PricingSection from "@/components/PricingSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 
@@ -18,7 +17,6 @@ const Index = () => {
         <FeaturesSection />
         <MissionSection />
         <PricingSection />
-        <TestimonialsSection />
       </main>
       <Footer />
       <ChatBot />
