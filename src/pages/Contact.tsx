@@ -7,40 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Mail, 
-  Phone, 
   MapPin, 
   Clock,
-  MessageCircle,
   HelpCircle,
   Users,
   FileText
 } from "lucide-react";
 
 const Contact = () => {
-  const contactMethods = [
-    {
-      icon: Mail,
-      title: "Email Support",
-      description: "Get help with your account or general questions",
-      contact: "support@grantly.com",
-      responseTime: "Within 24 hours"
-    },
-    {
-      icon: MessageCircle,
-      title: "Live Chat",
-      description: "Quick answers to urgent questions",
-      contact: "Available in-app",
-      responseTime: "Instant"
-    },
-    {
-      icon: Phone,
-      title: "Phone Support",
-      description: "Speak directly with our team",
-      contact: "+1 (555) 123-4567",
-      responseTime: "Mon-Fri, 9AM-6PM EST"
-    }
-  ];
-
   const supportTopics = [
     {
       icon: HelpCircle,
@@ -96,47 +70,6 @@ const Contact = () => {
             <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto mb-8 animate-slide-up">
               Ready to start your scholarship journey? Have questions about our platform? We're here to help you succeed.
             </p>
-          </div>
-        </section>
-
-        {/* Contact Methods */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                How Can We Help?
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Choose the best way to reach us based on your needs
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              {contactMethods.map((method, index) => (
-                <Card key={index} className="bg-card border-border hover:shadow-card transition-all duration-300 text-center">
-                  <CardHeader>
-                    <div className="bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <method.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-xl text-card-foreground">
-                      {method.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
-                      {method.description}
-                    </p>
-                    <p className="font-semibold text-card-foreground mb-2">
-                      {method.contact}
-                    </p>
-                    <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      {method.responseTime}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         </section>
 
