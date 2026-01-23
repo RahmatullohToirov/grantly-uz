@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Mail, 
-  MapPin, 
-  Clock,
   HelpCircle,
   Users,
   FileText
@@ -151,26 +149,6 @@ const Contact = () => {
                       </Card>
                     ))}
                   </div>
-
-                  <div className="mt-8">
-                    <h3 className="text-xl font-bold text-foreground mb-4">
-                      Office Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        <span className="text-muted-foreground">
-                          123 Education Street, Learning City, LC 12345
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <span className="text-muted-foreground">
-                          Monday - Friday: 9:00 AM - 6:00 PM EST
-                        </span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -218,20 +196,6 @@ const Contact = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 bg-primary">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
-              Still Have Questions?
-            </h2>
-            <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-              Our support team is ready to help you succeed in your scholarship journey.
-            </p>
-            <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-              Start Live Chat
-            </Button>
-          </div>
-        </section>
       </main>
       <Footer />
       <ChatBot />
