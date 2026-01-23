@@ -30,13 +30,6 @@ const About = () => {
     }
   ];
 
-  const stats = [
-    { number: "10,000+", label: "Students Helped" },
-    { number: "500+", label: "Scholarships Tracked" },
-    { number: "95%", label: "Success Rate" },
-    { number: "50+", label: "Countries Reached" }
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -119,33 +112,6 @@ const About = () => {
                   control of their educational future and achieve their dreams.
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Impact Stats */}
-        <section className="py-20 bg-primary">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-                Our Impact
-              </h2>
-              <p className="text-xl text-primary-foreground/90">
-                Making a difference in students' lives worldwide
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="text-lg text-primary-foreground/90">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
