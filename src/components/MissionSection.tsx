@@ -18,17 +18,6 @@ const MissionSection = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-secondary/20"></div>
             </div>
-            
-            {/* Floating stats */}
-            <div className="absolute -top-4 -left-4 bg-background rounded-xl p-4 shadow-card border border-border/50 animate-float">
-              <div className="text-2xl font-bold text-primary">$2.1M+</div>
-              <div className="text-sm text-muted-foreground">Scholarships Won</div>
-            </div>
-            
-            <div className="absolute -bottom-4 -right-4 bg-background rounded-xl p-4 shadow-card border border-border/50 animate-float" style={{ animationDelay: '1s' }}>
-              <div className="text-2xl font-bold text-secondary">15,000+</div>
-              <div className="text-sm text-muted-foreground">Success Stories</div>
-            </div>
           </div>
 
           {/* Content */}
@@ -58,25 +47,12 @@ const MissionSection = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center p-4 bg-background/50 rounded-xl backdrop-blur-sm border border-border/30">
-                  <div className="text-3xl font-bold text-primary">98%</div>
-                  <div className="text-sm text-muted-foreground">Match Accuracy</div>
-                </div>
-                <div className="text-center p-4 bg-background/50 rounded-xl backdrop-blur-sm border border-border/30">
-                  <div className="text-3xl font-bold text-secondary">3.2x</div>
-                  <div className="text-sm text-muted-foreground">Higher Success Rate</div>
-                </div>
-              </div>
-              
-              <SignUpModal>
-                <Button variant="hero" size="xl" className="group">
-                  Join Our Mission
-                  <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </SignUpModal>
-            </div>
+            <SignUpModal>
+              <Button variant="hero" size="xl" className="group">
+                Join Our Mission
+                <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </SignUpModal>
           </div>
         </div>
       </div>
