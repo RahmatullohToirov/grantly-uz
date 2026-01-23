@@ -13,8 +13,6 @@ import {
   Calendar, 
   FileText, 
   Bell, 
-  Shield,
-  Smartphone,
   Globe,
   Award,
   BookOpen
@@ -63,16 +61,6 @@ const Features = () => {
       icon: Bell,
       title: "Real-time Notifications",
       description: "Get instant updates when new opportunities match your profile."
-    },
-    {
-      icon: Shield,
-      title: "Secure & Private",
-      description: "Your data is encrypted and protected with enterprise-level security."
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile Optimized",
-      description: "Access your opportunities and track progress from any device, anywhere."
     },
     {
       icon: Globe,
