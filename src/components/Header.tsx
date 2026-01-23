@@ -2,14 +2,12 @@ import { Button } from "@/components/ui/button";
 import SignInModal from "@/components/auth/SignInModal";
 import SignUpModal from "@/components/auth/SignUpModal";
 import ThemeToggle from "@/components/ThemeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t } = useLanguage();
+  
 
   return (
     <>
@@ -31,24 +29,16 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('about')}
+              About
             </a>
             <a href="/features" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('features')}
+              Features
             </a>
             <a href="/pricing" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('pricing')}
+              Pricing
             </a>
-            
-            {/*<a href="/resources" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('resources')}
-            </a>
-            <a href="/community" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('community')}
-            </a>*/}
-            
             <a href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-              {t('contact')}
+              Contact
             </a>
           </nav>
 
@@ -56,7 +46,6 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             <div className="hidden sm:flex items-center space-x-2">
               <ThemeToggle />
-              <LanguageSwitcher />
             </div>
             
             {/* Desktop Auth Buttons */}
@@ -66,7 +55,7 @@ const Header = () => {
                   variant="ghost" 
                   data-signin-trigger
                 >
-                  {t('signIn')}
+                  Sign In
                 </Button>
               </SignInModal>
               <SignUpModal>
@@ -76,7 +65,7 @@ const Header = () => {
                   className="bg-gradient-primary text-primary-foreground hover:shadow-button transition-all"
                   data-signup-trigger
                 >
-                  {t('getStartedFree')}
+                  Get Started Free
                 </Button>
               </SignUpModal>
             </div>
@@ -99,12 +88,11 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-sm">
           <nav className="container mx-auto px-4 py-4 space-y-3">
-            {/* Theme and Language Switchers for Mobile */}
+            {/* Theme Switcher for Mobile */}
             <div className="flex items-center justify-between pb-3 border-b border-border sm:hidden">
               <span className="text-sm text-muted-foreground">Settings</span>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
-                <LanguageSwitcher />
               </div>
             </div>
             
@@ -113,28 +101,28 @@ const Header = () => {
               className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('about')}
+              About
             </a>
             <a 
               href="/features" 
               className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('features')}
+              Features
             </a>
             <a 
               href="/pricing" 
               className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('pricing')}
+              Pricing
             </a>
             <a 
               href="/contact" 
               className="block py-2.5 text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t('contact')}
+              Contact
             </a>
             
             {/* Auth Buttons for Mobile */}
@@ -145,7 +133,7 @@ const Header = () => {
                   size="lg"
                   className="w-full"
                 >
-                  {t('signIn')}
+                  Sign In
                 </Button>
               </SignInModal>
               <SignUpModal>
@@ -153,7 +141,7 @@ const Header = () => {
                   size="lg"
                   className="w-full bg-gradient-primary text-primary-foreground"
                 >
-                  {t('getStartedFree')}
+                  Get Started Free
                 </Button>
               </SignUpModal>
             </div>

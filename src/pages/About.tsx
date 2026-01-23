@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Target, Award, Heart } from "lucide-react";
+import { Users, Target, Heart } from "lucide-react";
 import SignUpModal from "@/components/auth/SignUpModal";
 
 const About = () => {
@@ -22,11 +22,6 @@ const About = () => {
       icon: Users,
       title: "Community",
       description: "Building a supportive network of scholars, mentors, and alumni who succeed together."
-    },
-    {
-      icon: Award,
-      title: "Impact",
-      description: "Helping thousands of students track applications and secure life-changing opportunities."
     }
   ];
 
@@ -61,7 +56,7 @@ const About = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               {values.map((value, index) => (
                 <Card key={index} className="bg-card border-border hover:shadow-card transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-6 text-center">

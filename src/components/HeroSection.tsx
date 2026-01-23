@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import heroIllustration from "@/assets/hero-illustration.jpg";
 import SignUpModal from "@/components/auth/SignUpModal";
 
@@ -38,10 +38,6 @@ const HeroSection = () => {
                 </Button>
               </SignUpModal>
               
-              <Button variant="hero-outline" size="xl" className="group">
-                <Play className="group-hover:scale-110 transition-transform" />
-                See How It Works
-              </Button>
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-muted-foreground">
@@ -55,7 +51,7 @@ const HeroSection = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-secondary rounded-full"></div>
-                <span>1M+ opportunities</span>
+                <span>opportunities</span>
               </div>
             </div>
           </div>
