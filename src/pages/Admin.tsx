@@ -15,6 +15,11 @@ import {
   Scholarship,
   ScholarshipInput,
 } from '@/hooks/useAdmin';
+import {
+  useAdminMentorApplications,
+  useUpdateMentorApplicationStatus,
+  useDeleteMentorApplication,
+} from '@/hooks/useMentorApplications';
 import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,7 +51,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   GraduationCap,
   Users,
@@ -57,9 +62,11 @@ import {
   Shield,
   Loader2,
   ShieldAlert,
-  TrendingUp,
+  Heart,
+  CheckCircle,
+  XCircle,
   Clock,
-  Search,
+  Eye,
 } from 'lucide-react';
 
 const Admin = () => {
@@ -69,14 +76,19 @@ const Admin = () => {
   const { data: scholarships, isLoading: scholarshipsLoading } = useAdminScholarships();
   const { data: users } = useAdminUsers();
   const { data: roles } = useUserRoles();
+  const { data: mentorApplications, isLoading: mentorAppsLoading } = useAdminMentorApplications();
   const createScholarship = useCreateScholarship();
   const updateScholarship = useUpdateScholarship();
   const deleteScholarship = useDeleteScholarship();
   const assignRole = useAssignRole();
   const removeRole = useRemoveRole();
+  const updateMentorStatus = useUpdateMentorApplicationStatus();
+  const deleteMentorApp = useDeleteMentorApplication();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScholarship, setEditingScholarship] = useState<Scholarship | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
+  const [adminNotes, setAdminNotes] = useState('');
   const [formData, setFormData] = useState<ScholarshipInput>({
     title: '',
     description: '',
@@ -385,6 +397,7 @@ const Admin = () => {
         <Tabs defaultValue="scholarships" className="space-y-6">
           <TabsList>
             <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
+            <TabsTrigger value="mentor-applications">Mentor Applications</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
@@ -505,6 +518,214 @@ const Admin = () => {
                               size="icon"
                               onClick={() => handleDelete(scholarship.id)}
                               disabled={deleteScholarship.isPending}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="mentor-applications" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Mentor Applications</h2>
+                <p className="text-sm text-muted-foreground">
+                  Review and manage mentor applications from users
+                </p>
+              </div>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Heart className="h-3 w-3" />
+                {mentorApplications?.filter(a => a.status === 'pending').length || 0} Pending
+              </Badge>
+            </div>
+
+            {mentorAppsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : mentorApplications?.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No mentor applications yet.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Applicant</TableHead>
+                      <TableHead>Experience</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mentorApplications?.map((application) => (
+                      <TableRow key={application.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={application.profile?.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {application.profile?.full_name?.charAt(0) || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">
+                                {application.profile?.full_name || 'Unknown'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {application.profile?.field_of_study || 'No field specified'}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={application.has_experience ? 'default' : 'outline'}>
+                            {application.has_experience ? 'Yes' : 'No'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              application.status === 'approved' ? 'default' :
+                              application.status === 'rejected' ? 'destructive' :
+                              'secondary'
+                            }
+                            className="flex items-center gap-1 w-fit"
+                          >
+                            {application.status === 'approved' && <CheckCircle className="h-3 w-3" />}
+                            {application.status === 'rejected' && <XCircle className="h-3 w-3" />}
+                            {application.status === 'pending' && <Clock className="h-3 w-3" />}
+                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(application.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Dialog
+                              open={selectedApplication === application.id}
+                              onOpenChange={(open) => {
+                                if (open) {
+                                  setSelectedApplication(application.id);
+                                  setAdminNotes(application.admin_notes || '');
+                                } else {
+                                  setSelectedApplication(null);
+                                  setAdminNotes('');
+                                }
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Mentor Application</DialogTitle>
+                                  <DialogDescription>
+                                    Review the application details and update status
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 pt-4">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-12 w-12">
+                                      <AvatarImage src={application.profile?.avatar_url || undefined} />
+                                      <AvatarFallback>
+                                        {application.profile?.full_name?.charAt(0) || '?'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-semibold">
+                                        {application.profile?.full_name || 'Unknown'}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {application.profile?.education_level} • {application.profile?.field_of_study}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-muted/50 rounded-lg p-4">
+                                    <Label className="text-sm text-muted-foreground">Has Mentoring Experience?</Label>
+                                    <p className="font-medium mt-1">
+                                      {application.has_experience ? 'Yes' : 'No'}
+                                    </p>
+                                  </div>
+
+                                  <div className="bg-muted/50 rounded-lg p-4">
+                                    <Label className="text-sm text-muted-foreground">Why they want to mentor</Label>
+                                    <p className="mt-1 text-sm whitespace-pre-wrap">
+                                      {application.motivation}
+                                    </p>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label htmlFor="admin-notes">Admin Notes</Label>
+                                    <Textarea
+                                      id="admin-notes"
+                                      value={adminNotes}
+                                      onChange={(e) => setAdminNotes(e.target.value)}
+                                      placeholder="Add notes for the applicant..."
+                                      rows={3}
+                                    />
+                                  </div>
+
+                                  <div className="flex gap-2 pt-4">
+                                    <Button
+                                      variant="outline"
+                                      className="flex-1"
+                                      onClick={() => {
+                                        updateMentorStatus.mutate({
+                                          id: application.id,
+                                          status: 'rejected',
+                                          admin_notes: adminNotes || undefined,
+                                        });
+                                        setSelectedApplication(null);
+                                      }}
+                                      disabled={updateMentorStatus.isPending}
+                                    >
+                                      <XCircle className="mr-2 h-4 w-4" />
+                                      Reject
+                                    </Button>
+                                    <Button
+                                      className="flex-1"
+                                      onClick={() => {
+                                        updateMentorStatus.mutate({
+                                          id: application.id,
+                                          status: 'approved',
+                                          admin_notes: adminNotes || undefined,
+                                        });
+                                        setSelectedApplication(null);
+                                      }}
+                                      disabled={updateMentorStatus.isPending}
+                                    >
+                                      <CheckCircle className="mr-2 h-4 w-4" />
+                                      Approve
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this application?')) {
+                                  deleteMentorApp.mutate(application.id);
+                                }
+                              }}
+                              disabled={deleteMentorApp.isPending}
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
