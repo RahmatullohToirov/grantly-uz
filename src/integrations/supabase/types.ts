@@ -127,6 +127,39 @@ export type Database = {
           },
         ]
       }
+      mentor_applications: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          has_experience: boolean
+          id: string
+          motivation: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          has_experience?: boolean
+          id?: string
+          motivation: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          has_experience?: boolean
+          id?: string
+          motivation?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentors: {
         Row: {
           available: boolean | null
