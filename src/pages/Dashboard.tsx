@@ -444,30 +444,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Community Feed */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Community</CardTitle>
-                <CardDescription>
-                  Latest updates from mentors and peers
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm">
-                  <p className="font-medium">Sarah M. got accepted!</p>
-                  <p className="text-muted-foreground text-xs">Rhodes Scholarship 2024</p>
-                </div>
-                <div className="text-sm">
-                  <p className="font-medium">New workshop available</p>
-                  <p className="text-muted-foreground text-xs">Essay writing masterclass</p>
-                </div>
-                <Link to="/community">
-                  <Button variant="ghost" className="w-full text-sm">
-                    Join Community
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
