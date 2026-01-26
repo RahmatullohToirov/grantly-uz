@@ -6,8 +6,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsAdmin } from "@/hooks/useAdmin";
 import { NotificationBell } from "@/components/NotificationBell";
 import {
@@ -22,7 +20,6 @@ import {
 const DashboardHeader = () => {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile();
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
@@ -40,12 +37,12 @@ const DashboardHeader = () => {
   };
 
   const navigationItems = [
-    { href: "/dashboard", icon: Home, label: t('dashboard') },
-    { href: "/scholarships", icon: Search, label: t('scholarships') },
-    { href: "/video-learning", icon: PlayCircle, label: t('learningHub') },
-    { href: "/mentor-matching", icon: Users, label: t('expertConnect') },
-    { href: "/community", icon: MessageCircle, label: t('community') },
-    { href: "/resources", icon: BookOpen, label: t('resources') },
+    { href: "/dashboard", icon: Home, label: "Dashboard" },
+    { href: "/scholarships", icon: Search, label: "Scholarships" },
+    { href: "/video-learning", icon: PlayCircle, label: "Learning Hub" },
+    { href: "/mentor-matching", icon: Users, label: "Expert Connect" },
+    { href: "/community", icon: MessageCircle, label: "Community" },
+    { href: "/resources", icon: BookOpen, label: "Resources" },
   ];
 
   return (
@@ -79,10 +76,9 @@ const DashboardHeader = () => {
 
           {/* Right side controls */}
           <div className="flex items-center space-x-2">
-            {/* Theme and Language - Hidden on smallest screens, shown in mobile menu */}
+            {/* Theme toggle - Hidden on smallest screens, shown in mobile menu */}
             <div className="hidden sm:flex items-center space-x-2">
               <ThemeToggle />
-              <LanguageSwitcher />
             </div>
             
             <div className="hidden sm:inline-flex">
@@ -126,11 +122,11 @@ const DashboardHeader = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
-                  <span>{t('profile')}</span>
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  <span>{t('dashboard')}</span>
+                  <span>Dashboard</span>
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate("/admin")}>
@@ -141,7 +137,7 @@ const DashboardHeader = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>{t('logout')}</span>
+                  <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -158,7 +154,6 @@ const DashboardHeader = () => {
               <span className="text-sm font-medium text-muted-foreground">Settings</span>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
-                <LanguageSwitcher />
               </div>
             </div>
 
@@ -204,7 +199,7 @@ const DashboardHeader = () => {
                 }}
               >
                 <User className="mr-2 h-5 w-5" />
-                <span>{t('profile')}</span>
+                <span>Profile</span>
               </Button>
               {isAdmin && (
                 <Button
@@ -228,7 +223,7 @@ const DashboardHeader = () => {
                 }}
               >
                 <LogOut className="mr-2 h-5 w-5" />
-                <span>{t('logout')}</span>
+                <span>Logout</span>
               </Button>
             </div>
           </nav>
