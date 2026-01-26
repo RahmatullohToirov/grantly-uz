@@ -1,51 +1,38 @@
+import { useState } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import ChatBot from "@/components/ChatBot";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  BookOpen, 
-  Video, 
-  FileText, 
-  Download,
-  Lightbulb,
-  GraduationCap
+  Sparkles,
+  Eye,
+  Scale,
+  PenTool,
+  Calendar,
+  Brain,
+  Calculator,
+  Search
 } from "lucide-react";
-import BecomeMentorForm from "@/components/mentor/BecomeMentorForm";
+import AIApplicationAdviser from "@/components/tools/AIApplicationAdviser";
+import ScholarshipComparisonTool from "@/components/tools/ScholarshipComparisonTool";
+import AIEssayBuilder from "@/components/tools/AIEssayBuilder";
+import ApplicationTracker from "@/components/tools/ApplicationTracker";
+import EssayAnalyzer from "@/components/tools/EssayAnalyzer";
+import GPACalculator from "@/components/tools/GPACalculator";
+import ScholarshipFinder from "@/components/tools/ScholarshipFinder";
+import ScholarshipShadowMode from "@/components/tools/ScholarshipShadowMode";
 
 const Resources = () => {
-  const upcomingFeatures = [
-    {
-      icon: BookOpen,
-      title: "Scholarship Guides",
-      description: "Step-by-step guides for every stage of your application"
-    },
-    {
-      icon: Video,
-      title: "Video Courses",
-      description: "Expert-led courses on essay writing, interviews, and more"
-    },
-    {
-      icon: FileText,
-      title: "Essay Templates",
-      description: "Proven templates and examples from successful applicants"
-    },
-    {
-      icon: Download,
-      title: "Downloadable Resources",
-      description: "Checklists, planners, and preparation materials"
-    }
-  ];
+  const [openTool, setOpenTool] = useState<string | null>(null);
 
-  const values = [
-    {
-      icon: Lightbulb,
-      title: "Expert Knowledge",
-      description: "Learn from mentors who've successfully navigated the scholarship process"
-    },
-    {
-      icon: GraduationCap,
-      title: "Practical Guidance",
-      description: "Get actionable advice that you can apply to your applications immediately"
-    }
+  const quickTools = [
+    { name: "AI Application Adviser", description: "Chat with AI for guidance", icon: Sparkles, color: "bg-gradient-to-br from-primary/20 to-secondary/20 text-primary", toolKey: "adviser" },
+    { name: "Scholarship Shadow Mode", description: "Rehearse applications privately", icon: Eye, color: "bg-cyan-100 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-400", toolKey: "shadow-mode" },
+    { name: "Scholarship Comparison", description: "Compare scholarships side-by-side", icon: Scale, color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400", toolKey: "comparison" },
+    { name: "AI Essay Builder", description: "Build compelling essays", icon: PenTool, color: "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400", toolKey: "essay-builder" },
+    { name: "Application Tracker", description: "Track deadlines and progress", icon: Calendar, color: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400", toolKey: "tracker" },
+    { name: "Essay Analyzer", description: "AI-powered essay feedback", icon: Brain, color: "bg-pink-100 text-pink-600 dark:bg-pink-950 dark:text-pink-400", toolKey: "essay-analyzer" },
+    { name: "GPA Calculator", description: "Calculate and convert grades", icon: Calculator, color: "bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400", toolKey: "gpa" },
+    { name: "Scholarship Finder", description: "Personalized recommendations", icon: Search, color: "bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400", toolKey: "finder" },
   ];
 
   return (
@@ -54,68 +41,49 @@ const Resources = () => {
       <main className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 animate-pulse">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            Coming soon...
-          </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Learning Resources</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Resources</h1>
           <p className="text-muted-foreground">
-            We're building a comprehensive library of guides, templates, and courses to help you succeed
+            Essential tools to streamline your scholarship journey
           </p>
         </div>
 
-        {/* Become a Mentor Section */}
-        <section className="mb-12">
-          <BecomeMentorForm />
-        </section>
-
-        {/* What's Coming */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">What We're Building</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {upcomingFeatures.map((feature, index) => (
-              <Card key={index} className="border-border text-center">
-                <CardContent className="p-6">
-                  <feature.icon className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="font-semibold text-card-foreground mb-2">
-                    {feature.title}
+        {/* Quick Tools */}
+        <section>
+          <h2 className="text-2xl font-bold text-foreground mb-6">Quick Access Tools</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {quickTools.map((tool, index) => (
+              <Card 
+                key={index} 
+                className="bg-card border-border hover:shadow-soft transition-all duration-300 hover:scale-105 cursor-pointer animate-fade-in"
+                onClick={() => setOpenTool(tool.toolKey)}
+              >
+                <CardContent className="p-4 md:p-6 text-center">
+                  <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl ${tool.color} flex items-center justify-center mx-auto mb-3 md:mb-4`}>
+                    <tool.icon className="h-6 w-6 md:h-8 md:w-8" />
+                  </div>
+                  <h3 className="font-semibold text-card-foreground mb-1 md:mb-2 text-sm md:text-base">
+                    {tool.name}
                   </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {feature.description}
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    {tool.description}
                   </p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </section>
-
-        {/* Values Section */}
-        <section>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Our Approach</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {values.map((value, index) => (
-              <Card key={index} className="border-border">
-                <CardContent className="p-6 flex items-start gap-4">
-                  <div className="p-3 rounded-lg bg-primary/10">
-                    <value.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-card-foreground mb-2">
-                      {value.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {value.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
       </main>
+
+      {/* Tool Dialogs */}
+      <AIApplicationAdviser open={openTool === "adviser"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ScholarshipShadowMode open={openTool === "shadow-mode"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ScholarshipComparisonTool open={openTool === "comparison"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <AIEssayBuilder open={openTool === "essay-builder"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ApplicationTracker open={openTool === "tracker"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <EssayAnalyzer open={openTool === "essay-analyzer"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <GPACalculator open={openTool === "gpa"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      <ScholarshipFinder open={openTool === "finder"} onOpenChange={(open) => !open && setOpenTool(null)} />
+      
       <ChatBot />
     </div>
   );
