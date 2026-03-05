@@ -79,7 +79,7 @@ export default () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <SnowEffect />
+          
           <AuthProvider>
             <BrowserRouter>
               <SPARedirectHandler />
