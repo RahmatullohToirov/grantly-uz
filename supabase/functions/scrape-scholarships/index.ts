@@ -94,6 +94,9 @@ serve(async (req) => {
 
     const results: { source: string; found: number; added: number; errors: string[] }[] = [];
 
+    for (const source of SOURCES) {
+      const sourceResult = { source: source.name, found: 0, added: 0, errors: [] as string[] };
+
       try {
         // Step 1: Scrape the website with Firecrawl
         console.log(`Scraping ${source.url}...`);
