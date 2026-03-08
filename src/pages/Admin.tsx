@@ -20,8 +20,9 @@ import {
   useUpdateMentorApplicationStatus,
   useDeleteMentorApplication,
 } from '@/hooks/useMentorApplications';
-import { useRunScraper } from '@/hooks/useScholarshipScraper';
+import { useRunScraper, SCRAPER_SOURCES } from '@/hooks/useScholarshipScraper';
 import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -89,6 +90,8 @@ const Admin = () => {
   const deleteMentorApp = useDeleteMentorApplication();
   const runScraper = useRunScraper();
   const [scraperResults, setScraperResults] = useState<any[] | null>(null);
+  const [selectedSources, setSelectedSources] = useState<string[]>(SCRAPER_SOURCES.map(s => s.name));
+  const [isScraperOpen, setIsScraperOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScholarship, setEditingScholarship] = useState<Scholarship | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
@@ -418,21 +421,87 @@ const Admin = () => {
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    const result = await runScraper.mutateAsync();
-                    setScraperResults(result.results);
-                  }}
-                  disabled={runScraper.isPending}
-                >
-                  {runScraper.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Bot className="mr-2 h-4 w-4" />
-                  )}
-                  {runScraper.isPending ? 'Scraping...' : 'AI Scrape'}
-                </Button>
+                <Dialog open={isScraperOpen} onOpenChange={setIsScraperOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" disabled={runScraper.isPending}>
+                      {runScraper.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Bot className="mr-2 h-4 w-4" />
+                      )}
+                      {runScraper.isPending ? 'Scraping...' : 'AI Scrape'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Select Sources to Scrape</DialogTitle>
+                      <DialogDescription>
+                        Choose which scholarship websites to scrape
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm text-muted-foreground">
+                          {selectedSources.length} of {SCRAPER_SOURCES.length} selected
+                        </Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setSelectedSources(
+                              selectedSources.length === SCRAPER_SOURCES.length
+                                ? []
+                                : SCRAPER_SOURCES.map((s) => s.name)
+                            )
+                          }
+                        >
+                          {selectedSources.length === SCRAPER_SOURCES.length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      </div>
+                      {SCRAPER_SOURCES.map((source) => (
+                        <div key={source.name} className="flex items-center gap-3 p-2 rounded-md border">
+                          <Checkbox
+                            id={`source-${source.name}`}
+                            checked={selectedSources.includes(source.name)}
+                            onCheckedChange={(checked) =>
+                              setSelectedSources((prev) =>
+                                checked
+                                  ? [...prev, source.name]
+                                  : prev.filter((n) => n !== source.name)
+                              )
+                            }
+                          />
+                          <div className="flex-1 min-w-0">
+                            <Label htmlFor={`source-${source.name}`} className="text-sm font-medium cursor-pointer">
+                              {source.name}
+                            </Label>
+                            <p className="text-xs text-muted-foreground truncate">{source.url}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="outline" onClick={() => setIsScraperOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        disabled={runScraper.isPending || selectedSources.length === 0}
+                        onClick={async () => {
+                          setIsScraperOpen(false);
+                          const result = await runScraper.mutateAsync(selectedSources);
+                          setScraperResults(result.results);
+                        }}
+                      >
+                        {runScraper.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Bot className="mr-2 h-4 w-4" />
+                        )}
+                        Scrape {selectedSources.length} Source{selectedSources.length !== 1 ? 's' : ''}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <BulkScholarshipUpload />
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                   <DialogTrigger asChild>

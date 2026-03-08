@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SOURCES = [
+const ALL_SOURCES = [
   { url: "https://scholarships365.info/", name: "Scholarships365" },
   { url: "https://scholarshipscorner.website/", name: "ScholarshipsCorner" },
   { url: "https://opportunitiescorners.info/", name: "OpportunitiesCorners" },
@@ -79,10 +79,20 @@ serve(async (req) => {
     // Use service role client for inserts
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const results: { source: string; found: number; added: number; errors: string[] }[] = [];
+    // Parse selected sources from request body
+    let selectedSourceNames: string[] | null = null;
+    try {
+      const body = await req.json();
+      selectedSourceNames = body?.sources || null;
+    } catch {
+      // empty body is fine, scrape all
+    }
 
-    for (const source of SOURCES) {
-      const sourceResult = { source: source.name, found: 0, added: 0, errors: [] as string[] };
+    const SOURCES = selectedSourceNames?.length
+      ? ALL_SOURCES.filter((s) => selectedSourceNames!.includes(s.name))
+      : ALL_SOURCES;
+
+    const results: { source: string; found: number; added: number; errors: string[] }[] = [];
 
       try {
         // Step 1: Scrape the website with Firecrawl
