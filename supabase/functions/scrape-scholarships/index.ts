@@ -84,7 +84,7 @@ serve(async (req) => {
     try {
       const body = await req.json();
       selectedSourceNames = body?.sources || null;
-    } catch {
+    } catch (_e) {
       // empty body is fine, scrape all
     }
 
@@ -93,6 +93,9 @@ serve(async (req) => {
       : ALL_SOURCES;
 
     const results: { source: string; found: number; added: number; errors: string[] }[] = [];
+
+    for (const source of SOURCES) {
+      const sourceResult = { source: source.name, found: 0, added: 0, errors: [] as string[] };
 
       try {
         // Step 1: Scrape the website with Firecrawl
