@@ -20,8 +20,9 @@ import {
   useUpdateMentorApplicationStatus,
   useDeleteMentorApplication,
 } from '@/hooks/useMentorApplications';
-import { useRunScraper } from '@/hooks/useScholarshipScraper';
+import { useRunScraper, SCRAPER_SOURCES } from '@/hooks/useScholarshipScraper';
 import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
