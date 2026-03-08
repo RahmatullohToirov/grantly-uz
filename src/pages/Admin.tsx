@@ -87,7 +87,8 @@ const Admin = () => {
   const removeRole = useRemoveRole();
   const updateMentorStatus = useUpdateMentorApplicationStatus();
   const deleteMentorApp = useDeleteMentorApplication();
-
+  const runScraper = useRunScraper();
+  const [scraperResults, setScraperResults] = useState<any[] | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScholarship, setEditingScholarship] = useState<Scholarship | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
