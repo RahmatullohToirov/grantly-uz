@@ -401,6 +401,10 @@ const Admin = () => {
         <Tabs defaultValue="scholarships" className="space-y-6">
           <TabsList>
             <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
+            <TabsTrigger value="archived">
+              <Archive className="mr-1 h-3 w-3" />
+              Archived
+            </TabsTrigger>
             <TabsTrigger value="mentor-applications">Mentor Applications</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
