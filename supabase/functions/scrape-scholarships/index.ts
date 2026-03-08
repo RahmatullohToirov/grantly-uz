@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SOURCES = [
+const ALL_SOURCES = [
   { url: "https://scholarships365.info/", name: "Scholarships365" },
   { url: "https://scholarshipscorner.website/", name: "ScholarshipsCorner" },
   { url: "https://opportunitiescorners.info/", name: "OpportunitiesCorners" },
