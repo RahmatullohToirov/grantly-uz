@@ -10,6 +10,10 @@ const corsHeaders = {
 const SOURCES = [
   { url: "https://scholarships365.info/", name: "Scholarships365" },
   { url: "https://scholarshipscorner.website/", name: "ScholarshipsCorner" },
+  { url: "https://opportunitiescorners.info/", name: "OpportunitiesCorners" },
+  { url: "https://www.scholarshipsads.com/", name: "ScholarshipsAds" },
+  { url: "https://www.afterschoolafrica.com/scholarships/", name: "AfterSchoolAfrica" },
+  { url: "https://scholarshiproar.com/", name: "ScholarshipRoar" },
 ];
 
 const CATEGORIES = ["STEM", "Arts", "Business", "Leadership", "Sports", "Community", "Exchange", "General"];
