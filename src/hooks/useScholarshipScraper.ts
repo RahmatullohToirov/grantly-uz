@@ -2,6 +2,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+export const SCRAPER_SOURCES = [
+  { name: "Scholarships365", url: "https://scholarships365.info/" },
+  { name: "ScholarshipsCorner", url: "https://scholarshipscorner.website/" },
+  { name: "OpportunitiesCorners", url: "https://opportunitiescorners.info/" },
+  { name: "ScholarshipsAds", url: "https://www.scholarshipsads.com/" },
+  { name: "AfterSchoolAfrica", url: "https://www.afterschoolafrica.com/scholarships/" },
+  { name: "ScholarshipRoar", url: "https://scholarshiproar.com/" },
+];
+
 interface ScrapeResult {
   source: string;
   found: number;
@@ -19,9 +28,9 @@ export const useRunScraper = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (): Promise<ScrapeResponse> => {
+    mutationFn: async (selectedSources?: string[]): Promise<ScrapeResponse> => {
       const { data, error } = await supabase.functions.invoke("scrape-scholarships", {
-        body: {},
+        body: { sources: selectedSources?.length ? selectedSources : null },
       });
 
       if (error) throw error;
