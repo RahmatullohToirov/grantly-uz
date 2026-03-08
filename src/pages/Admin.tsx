@@ -90,6 +90,8 @@ const Admin = () => {
   const deleteMentorApp = useDeleteMentorApplication();
   const runScraper = useRunScraper();
   const [scraperResults, setScraperResults] = useState<any[] | null>(null);
+  const [selectedSources, setSelectedSources] = useState<string[]>(SCRAPER_SOURCES.map(s => s.name));
+  const [isScraperOpen, setIsScraperOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScholarship, setEditingScholarship] = useState<Scholarship | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
