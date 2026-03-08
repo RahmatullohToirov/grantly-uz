@@ -20,6 +20,7 @@ import {
   useUpdateMentorApplicationStatus,
   useDeleteMentorApplication,
 } from '@/hooks/useMentorApplications';
+import { useRunScraper } from '@/hooks/useScholarshipScraper';
 import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,8 @@ import {
   XCircle,
   Clock,
   Eye,
+  Bot,
+  Archive,
 } from 'lucide-react';
 
 const Admin = () => {
@@ -84,7 +87,8 @@ const Admin = () => {
   const removeRole = useRemoveRole();
   const updateMentorStatus = useUpdateMentorApplicationStatus();
   const deleteMentorApp = useDeleteMentorApplication();
-
+  const runScraper = useRunScraper();
+  const [scraperResults, setScraperResults] = useState<any[] | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingScholarship, setEditingScholarship] = useState<Scholarship | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
@@ -397,6 +401,10 @@ const Admin = () => {
         <Tabs defaultValue="scholarships" className="space-y-6">
           <TabsList>
             <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
+            <TabsTrigger value="archived">
+              <Archive className="mr-1 h-3 w-3" />
+              Archived
+            </TabsTrigger>
             <TabsTrigger value="mentor-applications">Mentor Applications</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
@@ -409,7 +417,22 @@ const Admin = () => {
                   Add scholarships manually or upload in bulk from CSV/JSON files
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const result = await runScraper.mutateAsync();
+                    setScraperResults(result.results);
+                  }}
+                  disabled={runScraper.isPending}
+                >
+                  {runScraper.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Bot className="mr-2 h-4 w-4" />
+                  )}
+                  {runScraper.isPending ? 'Scraping...' : 'AI Scrape'}
+                </Button>
                 <BulkScholarshipUpload />
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                   <DialogTrigger asChild>
@@ -430,6 +453,37 @@ const Admin = () => {
                 </Dialog>
               </div>
             </div>
+
+            {/* Scraper Results */}
+            {scraperResults && (
+              <Card className="border-primary/30">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      Last Scrape Results
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => setScraperResults(null)}>
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {scraperResults.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 rounded bg-muted/50 text-sm">
+                      <span className="font-medium">{r.source}</span>
+                      <div className="flex items-center gap-3">
+                        <span>Found: {r.found}</span>
+                        <Badge variant="secondary">+{r.added} new</Badge>
+                        {r.errors.length > 0 && (
+                          <Badge variant="destructive">{r.errors.length} errors</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {scholarshipsLoading ? (
               <div className="flex justify-center py-8">
@@ -529,6 +583,84 @@ const Admin = () => {
                 </Table>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Archived Scholarships Tab */}
+          <TabsContent value="archived" className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Archive className="h-5 w-5" />
+                Archived Scholarships
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Scholarships with past deadlines (hidden from public view)
+              </p>
+            </div>
+
+            {scholarshipsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (() => {
+              const today = new Date().toISOString().split('T')[0];
+              const archived = scholarships?.filter(s => s.deadline && s.deadline < today) || [];
+              return archived.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Archive className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No archived scholarships.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Deadline (Expired)</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {archived.map((scholarship) => (
+                        <TableRow key={scholarship.id} className="opacity-75">
+                          <TableCell className="font-medium max-w-[200px] truncate">
+                            {scholarship.title}
+                          </TableCell>
+                          <TableCell>
+                            {scholarship.category && (
+                              <Badge variant="secondary">{scholarship.category}</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {scholarship.amount ? `$${scholarship.amount.toLocaleString()}` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="destructive" className="text-xs">
+                              {scholarship.deadline ? new Date(scholarship.deadline).toLocaleDateString() : '-'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{scholarship.source_name || '-'}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(scholarship.id)}
+                              disabled={deleteScholarship.isPending}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              );
+            })()}
           </TabsContent>
 
           <TabsContent value="mentor-applications" className="space-y-4">

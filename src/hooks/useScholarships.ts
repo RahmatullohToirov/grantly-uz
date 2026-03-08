@@ -65,11 +65,15 @@ export const useScholarships = (searchQuery?: string) => {
         appliedIds = applications?.map(a => a.scholarship_id) || [];
       }
 
-      // Build query
+      // Build query - only show scholarships with future deadlines or no deadline
       let query = supabase
         .from('scholarships')
         .select('*')
         .order('deadline', { ascending: true });
+
+      // Filter out expired scholarships for public view
+      const today = new Date().toISOString().split('T')[0];
+      query = query.or(`deadline.is.null,deadline.gte.${today}`);
 
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
