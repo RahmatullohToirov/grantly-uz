@@ -20,6 +20,7 @@ import {
   useUpdateMentorApplicationStatus,
   useDeleteMentorApplication,
 } from '@/hooks/useMentorApplications';
+import { useRunScraper } from '@/hooks/useScholarshipScraper';
 import { BulkScholarshipUpload } from '@/components/admin/BulkScholarshipUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,8 @@ import {
   XCircle,
   Clock,
   Eye,
+  Bot,
+  Archive,
 } from 'lucide-react';
 
 const Admin = () => {
