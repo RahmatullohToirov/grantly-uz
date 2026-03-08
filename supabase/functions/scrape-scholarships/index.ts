@@ -84,7 +84,7 @@ serve(async (req) => {
     try {
       const body = await req.json();
       selectedSourceNames = body?.sources || null;
-    } catch {
+    } catch (_e) {
       // empty body is fine, scrape all
     }
 
