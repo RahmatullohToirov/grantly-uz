@@ -585,6 +585,84 @@ const Admin = () => {
             )}
           </TabsContent>
 
+          {/* Archived Scholarships Tab */}
+          <TabsContent value="archived" className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Archive className="h-5 w-5" />
+                Archived Scholarships
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Scholarships with past deadlines (hidden from public view)
+              </p>
+            </div>
+
+            {scholarshipsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (() => {
+              const today = new Date().toISOString().split('T')[0];
+              const archived = scholarships?.filter(s => s.deadline && s.deadline < today) || [];
+              return archived.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Archive className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No archived scholarships.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Deadline (Expired)</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {archived.map((scholarship) => (
+                        <TableRow key={scholarship.id} className="opacity-75">
+                          <TableCell className="font-medium max-w-[200px] truncate">
+                            {scholarship.title}
+                          </TableCell>
+                          <TableCell>
+                            {scholarship.category && (
+                              <Badge variant="secondary">{scholarship.category}</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {scholarship.amount ? `$${scholarship.amount.toLocaleString()}` : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="destructive" className="text-xs">
+                              {scholarship.deadline ? new Date(scholarship.deadline).toLocaleDateString() : '-'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{scholarship.source_name || '-'}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(scholarship.id)}
+                              disabled={deleteScholarship.isPending}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              );
+            })()}
+          </TabsContent>
+
           <TabsContent value="mentor-applications" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
