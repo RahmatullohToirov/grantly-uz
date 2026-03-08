@@ -417,7 +417,22 @@ const Admin = () => {
                   Add scholarships manually or upload in bulk from CSV/JSON files
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const result = await runScraper.mutateAsync();
+                    setScraperResults(result.results);
+                  }}
+                  disabled={runScraper.isPending}
+                >
+                  {runScraper.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Bot className="mr-2 h-4 w-4" />
+                  )}
+                  {runScraper.isPending ? 'Scraping...' : 'AI Scrape'}
+                </Button>
                 <BulkScholarshipUpload />
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                   <DialogTrigger asChild>
@@ -438,6 +453,37 @@ const Admin = () => {
                 </Dialog>
               </div>
             </div>
+
+            {/* Scraper Results */}
+            {scraperResults && (
+              <Card className="border-primary/30">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      Last Scrape Results
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={() => setScraperResults(null)}>
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {scraperResults.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 rounded bg-muted/50 text-sm">
+                      <span className="font-medium">{r.source}</span>
+                      <div className="flex items-center gap-3">
+                        <span>Found: {r.found}</span>
+                        <Badge variant="secondary">+{r.added} new</Badge>
+                        {r.errors.length > 0 && (
+                          <Badge variant="destructive">{r.errors.length} errors</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {scholarshipsLoading ? (
               <div className="flex justify-center py-8">
