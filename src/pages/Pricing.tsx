@@ -51,7 +51,6 @@ const plans = [
       "1-on-1 mentorship sessions",
       "Custom application strategies",
       "Interview preparation",
-      "Success guarantee program",
       "Priority phone support",
       "White-glove application assistance"
     ],
