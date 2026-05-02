@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
+import ScrollToTop from "./components/ScrollToTop";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ export default () => (
           <AuthProvider>
             <BrowserRouter>
               <SPARedirectHandler />
+              <ScrollToTop />
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
