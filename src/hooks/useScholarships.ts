@@ -247,10 +247,10 @@ export const useAddApplication = () => {
         description: "Scholarship added to your application tracker"
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error?.message || "Something went wrong. Please try again.",
         variant: "destructive"
       });
     }
